@@ -1,10 +1,23 @@
 import express, { type Request, type Response } from "express"
+import dotenv from "dotenv"
+import DB from "./db/dbconnection"
+import urlRouter from "./routes/url.routes"
+
+
+dotenv.config()
 const app=express()
 
-app.get("/",(req:Request,res:Response)=>{
-    res.send("start with New Project")
-})
+app.use(express.json())
 
-app.listen(3000,()=>console.log("server is start"))
+
+app.use("/api",urlRouter)
+
+
+
+
+
+
+DB().then(()=>console.log("db is connected")).catch(()=>console.log("db connection is failed"))
+app.listen(process.env.PORT,()=>console.log("server is start"))
 
 
