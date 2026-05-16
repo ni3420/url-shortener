@@ -37,7 +37,7 @@ const handleOriginalUrl=async(req:Request,res:Response)=>{
         if(!url) return res.status(404).json({"msg":"url not found"})
             const UrlData=await Url.findOne({short_Url:url})
         if(!UrlData) return res.status(400).json({"msg":"not any url found"})
-        res.redirect(UrlData.original_Url)
+         return   res.json({"original_Url":`${UrlData.original_Url}`})
     } catch (error) {
         console.log(error)
         
