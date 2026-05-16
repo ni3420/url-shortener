@@ -4,5 +4,5 @@ const router=Router()
 
 router.post("/",handleUrl)
 router.get("/",handleShowUrl)
-router.get("/:url",handleOriginalUrl)
+router.get("/:shortId",handleOriginalUrl)
 export default router

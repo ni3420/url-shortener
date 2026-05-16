@@ -1,13 +1,14 @@
-import express, { type Request, type Response } from "express"
+import express, { urlencoded, type Request, type Response } from "express"
 import dotenv from "dotenv"
 import DB from "./db/dbconnection"
 import urlRouter from "./routes/url.routes"
-
-
+import cors from "cors"
 dotenv.config()
 const app=express()
+app.use(cors())
 
 app.use(express.json())
+app.use(urlencoded({extended:false}))
 
 
 app.use("/api",urlRouter)
