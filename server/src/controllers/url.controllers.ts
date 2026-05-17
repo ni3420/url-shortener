@@ -5,7 +5,6 @@ import crypto from "crypto"
 
 const handleUrl=async(req:Request,res:Response)=>{
     try {
-        console.log(req.body)
         const data = Object.values(req.body)[0];
         
         if(!data) return res.status(400).json({msg:"url is required"})
@@ -31,12 +30,31 @@ res.send(urls)
     }
 }
 
+const handleUrlDeletion=async(req:Request,res:Response)=>{
+    try {
+          const data = Object.values(req.body)[0];
+          if(!data) return res.status(400).json({msg:"url is required"})
+            const del=await Url.findOneAndDelete({short_Url:data as string})
+        if(!del) return res.status(400).json({"msg":"url not found"})
+            res.json({"msg":"delete the url successful"})
+    } catch (error) {
+        console.log(error)
+        
+    }
+}
+
 const handleOriginalUrl=async(req:Request,res:Response)=>{
     try {
         const url=req.params.shortId;
         if(!url) return res.status(404).json({"msg":"url not found"})
-            const UrlData=await Url.findOne({short_Url:url})
+            const UrlData=await Url.findOneAndUpdate({short_Url:url},{
+        $push:{
+            TotalClicks:{
+                timeStamp:Date.now()
+            }
+        }})
         if(!UrlData) return res.status(400).json({"msg":"not any url found"})
+            
          return   res.json({"original_Url":`${UrlData.original_Url}`})
     } catch (error) {
         console.log(error)
@@ -44,4 +62,7 @@ const handleOriginalUrl=async(req:Request,res:Response)=>{
     }
 }
 
-export {handleUrl,handleShowUrl,handleOriginalUrl}
+
+
+
+export {handleUrl,handleShowUrl,handleOriginalUrl,handleUrlDeletion}

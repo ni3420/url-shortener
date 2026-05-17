@@ -6,7 +6,10 @@ import { useNavigate } from "react-router-dom";
 interface ApiResponse{
     
 original_Url:string,
-short_Url:string
+short_Url:string,
+TotalClicks:[{
+    timeStamp:Date  
+}]
 }
 
 const Home = () => {
@@ -29,6 +32,19 @@ init()
         console.log(res)
         setText("")
     }
+
+    const DeleteUrl=async(e:React.MouseEvent<HTMLButtonElement>,text:string)=>{
+      e.stopPropagation() 
+      const res=await axios.delete("/api",{data:{text}})
+      if(res)
+      {
+        const newUrl=url.filter((item)=>item.short_Url!==text)
+        setUrl(newUrl)
+      }
+      
+    }
+
+   
     return ( <>
    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
   <div className="w-full max-w-4xl space-y-6">
@@ -57,6 +73,8 @@ init()
         <th className="p-4 w-16 text-center">Sr. No.</th>
         <th className="p-4">Original URL</th>
         <th className="p-4">Short URL</th>
+        <th className="p-4">clicks</th>
+        <th className="p-4">Action</th>
       </tr>
     </thead>
 
@@ -74,6 +92,16 @@ init()
                 {item.short_Url}
               </button>
             </td>
+            <td className="p-4 break-all max-w-xs md:max-w-md text-gray-700">{item.TotalClicks.length}</td>
+            <td className="p-4">
+              <button 
+                className="font-medium text-blue-600 hover:underline break-all text-left" 
+                onClick={(e) =>DeleteUrl(e,item.short_Url)}
+              >
+              Delete
+              </button>
+            </td>
+            
           </tr>
         ))
       ) : (
