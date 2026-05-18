@@ -4,6 +4,8 @@ interface Url extends Document{
     short_Url:string;
     original_Url:string;
     TotalClicks:string[]
+    expireAt:Date
+    user:mongoose.Types.ObjectId
 }
 
 
@@ -17,6 +19,16 @@ index:true
 
 original_Url:{
     type:String,
+    required:true
+},
+expireAt:{
+    type:Date,
+    default: Date.now,
+    index:{expires:"1d"}
+},
+user:{
+    type:Schema.Types.ObjectId,
+    ref:"User",
     required:true
 },
 TotalClicks:[{timeStamp:{
