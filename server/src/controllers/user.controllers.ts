@@ -1,40 +1,41 @@
-import type { Request,Response } from "express";
-import UserModel from "../models/user.models";
-import bcrypt from "bcrypt"
+import type { Request, Response} from 'express';
+import UserModel from '../models/user.models';
+import bcrypt from 'bcrypt';
+import {getToken,GenerateToken} from "../service/token"
 
-const handleSignUp=async(req:Request,res:Response)=>{
-    const {email,password,name}=req.body
-    if(!email||!name||!password) return res.status(400).json({"msg":"required all field"})
-        try {
-            const user=await UserModel.create(email,name,password)
-        return res.status(200).json({"msg":"user will created",user})
-            
-        } catch (error) {
-            console.log(error)
-            res.status(500).json({"msg":"server error"})
-            
+
+const handleRegister=async (req:Request, res:Response) => {
+const {email,name,password}=req.body
+if(!email||!name||!password) return res.status(400).json({message:"All fields are required"})
+try {
+    const existingUser=await UserModel.findOne({email})
+    if(existingUser) return res.status(400).json({message:"User already exists"})
+    const user=await UserModel.create({email,name,password})    
+    res.status(201).json({message:"User registered successfully",user})
+} catch (error) {
+    res.status(500).json({message:"Server error",error})
+}
+}
+
+
+const handleLogin=async (req:Request, res:Response) => {
+    const {email, password} = req.body;
+    try {
+        const user = await UserModel.findOne({email});
+        if (!user) {
+            return res.status(404).json({message: 'User not found'});
+        }  
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({message: 'Invalid credentials'});
         }
-}
-
-
-const handleSignIn=async(req:Request,res:Response)=>{
-    const {email,password}=req.body;
-    if(!email||!password) return res.status(400).json({"msg":"all field required"})
-        try{
-    const user=await UserModel.findOne({email:email})
-    if(!user) return res.status(404).json({"msg":"invalid email or password"})
-        const pass=await bcrypt.compare(password,user.password)
-    if(pass)
-    {
-        res.status(200).json({"msg":"user is login"})
-    }
-    }catch(err)
-    {
-        console.log(err)
+            const token=GenerateToken(user.name, user.email);
+            res.cookie("token",token,{httpOnly:true,secure:true})
+        res.status(200).json({message: 'Login successful', user});
+    } catch (error) {
+        res.status(500).json({message: 'Server error', error});
     }
 }
 
 
-
-
-export {handleSignIn,handleSignUp}
+export {handleLogin,handleRegister}
