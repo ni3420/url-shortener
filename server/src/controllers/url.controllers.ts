@@ -1,6 +1,7 @@
 import Url from "../models/url.models";
 import type {  Request,Response } from "express";
 import crypto from "crypto"
+import QRcode from "qrcode"
 
 
 const handleUrl=async(req:Request,res:Response)=>{
@@ -11,7 +12,9 @@ const handleUrl=async(req:Request,res:Response)=>{
         const shortCode: string = crypto.randomBytes(8).toString('base64url').substring(0, 6);
         const url=await Url.create({
             short_Url:shortCode,
-            original_Url:"https://"+data as string 
+            original_Url:"https://"+(data as string).trim().replace(/^https?:\/\//, ''),
+            QR_Code:await QRcode.toDataURL(`http://localhost:3000/${shortCode}`)
+            
         })
         return res.status(201).json({msg:"url created"})
     } catch (error) {

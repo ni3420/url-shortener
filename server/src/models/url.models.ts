@@ -3,9 +3,10 @@ import mongoose,{Schema,Document} from "mongoose";
 interface Url extends Document{
     short_Url:string;
     original_Url:string;
+    QR_Code:string;
     TotalClicks:string[]
     expireAt:Date
-    user:mongoose.Types.ObjectId
+    user?:mongoose.Types.ObjectId
 }
 
 
@@ -21,16 +22,20 @@ original_Url:{
     type:String,
     required:true
 },
+QR_Code:{
+    type:String,
+    required:true
+},
 expireAt:{
     type:Date,
     default: Date.now,
     index:{expires:"1d"}
 },
-user:{
-    type:Schema.Types.ObjectId,
-    ref:"User",
-    required:true
-},
+// user:{
+//     type:Schema.Types.ObjectId,
+//     ref:"User",
+//     required:true
+// },
 TotalClicks:[{timeStamp:{
     type:Date,
 }}]
