@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import {z} from "zod"
 import { signupSchema } from "../../schema/schema";
+import axios from "axios";
 
 type SignUpSchema=z.infer<typeof signupSchema>
 
@@ -22,12 +23,24 @@ const SignUpPage = () => {
 
 //   const password = watch("password");
 
-  const onSubmit = async(data:SignUpSchema) => {
-    console.log(data)
-    // const res= await axios.post("/auth",data)
-    // console.log(res)
-
-  };
+  const onSubmit = async (data: SignUpSchema) => {
+  try {
+    const res = await axios.post("/api/auth/sign-up", data);
+    
+    if (res.data.success) {
+      console.log("Registration successful:", res.data.message);
+    }
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      const errorMessage = error.response.data.message || "An unexpected error occurred.";
+      console.error("Backend Error Message:", errorMessage);
+    } else if (error.request) {
+      console.error("Network Error: No response received from server.");
+    } else {
+      console.error("Error setting up registration request:", error.message);
+    }
+  }
+};
 
   const handleSocialSignUp = (provider:string) => {
     console.log(`OAuth registering via ${provider}`);

@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import {z} from "zod"
 import { loginSchema } from "../../schema/schema";
+import axios from "axios";
 
 type LoginValues=z.infer<typeof loginSchema>
 const SignInPage = () => {
@@ -16,9 +17,24 @@ const SignInPage = () => {
     },
   });
 
-  const onSubmit = (data:LoginValues) => {
-    console.log("Form Submitted Successfully:", data);
-  };
+  const onSubmit = async (data: LoginValues) => {
+  try {
+    const res = await axios.post("/api/auth/sign-in", data);
+    
+    if (res.data.success) {
+      console.log("Login successful:", res.data.message);
+    }
+  } catch (error: any) {
+    if (error.response && error.response.data) {
+      const errorMessage = error.response.data.message || "An unexpected error occurred.";
+      console.error("Backend Error Message:", errorMessage);
+    } else if (error.request) {
+      console.error("Network Error: No response received from server.");
+    } else {
+      console.error("Error setting up login request:", error.message);
+    }
+  }
+};
 
   const handleSocialLogin = (provider:string) => {
     console.log(`OAuth logging in via ${provider}`);
