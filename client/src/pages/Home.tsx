@@ -20,14 +20,21 @@ const Home = () => {
 
   useEffect(() => {
     const init = async () => {
-      const res = await axios.get("/api");
-      console.log(res)
-      if (res) {
-        setUrl(res.data);
+      try {
+        const res=await axios.get("/api")
+        if(res)
+        {
+          setUrl(res.data)
+        }
+        
+      } catch (error) {
+        console.log(error)
+        
+        
       }
     };
     init();
-  }, [text]);
+  }, []);
 
   const handle = async (text: string) => {
     if (!text.trim()) return;

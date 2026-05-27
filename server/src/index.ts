@@ -5,6 +5,7 @@ import urlRouter from "./routes/url.routes"
 import userRouter from "./routes/user.routes"
 import cookie from "cookie-parser"
 import cors from "cors"
+import auth from "./middlewares/auth"
 dotenv.config()
 const app=express()
 app.use(express.json())
@@ -18,9 +19,8 @@ app.use(express.json())
 app.use(urlencoded({extended:false}))
 
 
-
-app.use("/api",urlRouter)
 app.use("/api/auth",userRouter)
+app.use("/api",auth,urlRouter)
 
 
 

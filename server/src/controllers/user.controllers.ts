@@ -5,6 +5,29 @@ import {getToken,GenerateToken} from "../service/token"
 
 
 
+const handleGetCurrentUser=async(req:Request,res:Response)=>{
+    try {
+        const session=req.cookies?.token
+        if(!session)
+        {
+            return res.json({
+                code:401,
+                message:"unauthorized"
+            })
+        }
+        return res.json({
+            code:200,
+            message:"current session running",
+        
+        })
+    } catch (error) {
+        console.log(error)
+        
+    }
+
+}
+
+
 const handleRegister = async (req: Request, res: Response) => {
     const { email, name, password } = req.body;
 
@@ -95,4 +118,4 @@ const handleLogin = async (req: Request, res: Response) => {
     }
 }
 
-export {handleLogin,handleRegister}
+export {handleLogin,handleRegister,handleGetCurrentUser}

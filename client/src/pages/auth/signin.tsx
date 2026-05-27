@@ -20,6 +20,7 @@ const SignInPage = () => {
   const onSubmit = async (data: LoginValues) => {
   try {
     const res = await axios.post("/api/auth/sign-in", data);
+    console.log(res.data)
     
     if (res.data.success) {
       console.log("Login successful:", res.data.message);
