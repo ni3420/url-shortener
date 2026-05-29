@@ -28,6 +28,6 @@ app.use("/api",auth,urlRouter)
 
 
 DB().then(()=>console.log("db is connected")).catch(()=>console.log("db connection is failed"))
-app.listen(process.env.PORT,()=>console.log("server is start"))
+app.listen(process.env.PORT || "3000",()=>console.log("server is start"))
 
 
