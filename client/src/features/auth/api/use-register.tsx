@@ -5,7 +5,7 @@ import api from "../../../lib/api";
 export const useSignUp=()=>{
     const Mutation=useMutation({
         mutationFn:async(data:signupInput)=>{
-            const res=await api.post<signupInput>("/auth/sign-up",data)
+            const res=await api.post("/auth/sign-up",data)
             console.log(res)
             return res.data
         }

@@ -28,7 +28,7 @@ const LoginCard = () => {
       await mutateAsync(data);
       setToast({ type: 'success', message: 'Logged in successfully!' });
       setTimeout(() => setToast(null), 4000);
-    } catch (error) {
+    } catch  {
       setToast({ type: 'error', message: 'Login failed. Please check your credentials.' });
       setTimeout(() => setToast(null), 4000);
     }

@@ -29,7 +29,7 @@ const SignUpCard = () => {
       await mutateAsync(data);
       setToast({ type: 'success', message: 'Account created successfully!' });
       setTimeout(() => setToast(null), 4000);
-    } catch (error) {
+    } catch  {
       setToast({ type: 'error', message: 'Registration failed. Try a different email.' });
       setTimeout(() => setToast(null), 4000);
     }
