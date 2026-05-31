@@ -20,7 +20,7 @@ app.use(urlencoded({extended:false}))
 
 
 app.use("/api/auth",userRouter)
-app.use("/api",auth,urlRouter)
+app.use("/api",urlRouter)
 
 
 

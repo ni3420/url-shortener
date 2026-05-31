@@ -1,15 +1,22 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface Analytics extends Document {
-    urlId: mongoose.Types.ObjectId;  
+    shortId: mongoose.Types.ObjectId;  
     device: string;                 
     browser: string;                
     country: string;                
-    referrer: string;               
+    referrer: string;    
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    utm_term?: string;
+    utm_content?: string;
+    createdAt: Date;
+    updatedAt: Date;           
 }
 
 const AnalyticsSchema = new Schema<Analytics>({
-    urlId: { 
+    shortId: { 
         type: Schema.Types.ObjectId, 
         ref: "Url", 
         required: true 
@@ -30,8 +37,30 @@ const AnalyticsSchema = new Schema<Analytics>({
         type:String,
         default:"Direct"
     },
+    utm_source: {
+        type: String,
+        default: "organic" 
+    },
+    utm_medium: {
+        type: String,
+        default: "none"
+    },
+    utm_campaign: {
+        type: String,
+        default: "none"
+    },
+    utm_term: {
+        type: String,
+        default: "none"
+    },
+    utm_content: {
+        type: String,
+        default: "none"
+    }
 
 },{timestamps:true});
+
+AnalyticsSchema.index({ urlId: 1, createdAt: -1 });
 
 const AnalyticsModel = mongoose.models.Analytics || mongoose.model<Analytics>("Analytics", AnalyticsSchema);
 
