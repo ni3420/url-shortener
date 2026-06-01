@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import NavBar from "@/features/dashboard/components/NavBar";
 import SideBar from "@/features/dashboard/components/sidebar";
+import { Toaster } from "react-hot-toast";
 
 const DashBoardLayout = () => {
   return (
@@ -13,6 +14,7 @@ const DashBoardLayout = () => {
         <main className="flex-1 p-4 md:p-6 overflow-y-auto bg-base-200/60">
           <div className="max-w-7xl mx-auto w-full">
             <Outlet />
+            <Toaster/>
           </div>
         </main>
       </div>
