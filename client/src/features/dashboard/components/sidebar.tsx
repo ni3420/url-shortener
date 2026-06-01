@@ -1,11 +1,13 @@
 import { NavLink } from "react-router-dom";
+import {QrCode,BarChartBigIcon,Settings,HomeIcon, Link} from "lucide-react"
 
 const SideBar = () => {
   const menuItems = [
-    { to: "/dashboard/home", label: "Home", icon: "🏠" },
-    { to: "/dashboard/users", label: "Users", icon: "👥" },
-    { to: "/dashboard/products", label: "Products", icon: "📦" },
-    { to: "/dashboard/settings", label: "Settings", icon: "⚙️" },
+    { to: "/home", label: "Home", icon:<HomeIcon/> },
+    { to: "/links", label: "links", icon:<Link/> },
+    { to: "/dashboard/users", label: "QR Code", icon: <QrCode/> },
+    { to: "/dashboard/products", label: "analytics", icon:<BarChartBigIcon/>},
+    { to: "/dashboard/settings", label: "Settings", icon: <Settings/> },
   ];
 
   return (
