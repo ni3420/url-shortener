@@ -21,10 +21,11 @@ const AnalyticsSchema = new Schema<Analytics>({
         ref: "Url", 
         required: true 
     },
-    device:{
-        type:String,
-        default:"Desktop"
-    },
+    device: {
+  type: String,
+  enum: ["Desktop", "Mobile", "Tablet", "Bot"],
+  default: "unknown"
+},
     country:{
         type:String,
         default:"unknown"

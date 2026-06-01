@@ -1,60 +1,56 @@
-import type {Request,Response} from "express"
-import AnalyticsModel from "../models/analytics.models"
-import {UAParser} from "ua-parser-js"
+import type { Request, Response } from "express";
+import AnalyticsModel from "../models/analytics.models";
+import { UAParser } from "ua-parser-js";
 import Url from "../models/url.models";
 
-const handleUrlUtm=async(req:Request,res:Response)=>{
-try {
-    const {shortId}=req.params;
-const OriginalUrl=await Url.findOne({short_Url:shortId})
-if(!OriginalUrl)
-{
-    return res.json({"msg":"not found"})
-}
+const handleUrlUtm = async (req: Request, res: Response) => {
+  try {
+    const { shortId } = req.params;
 
-   const { 
-            utm_source, 
-            utm_medium, 
-            utm_campaign, 
-            utm_term, 
-            utm_content 
-        } = req.query
+    const originalUrl = await Url.findOne({ short_Url: shortId });
 
-        const userAgent = req.headers["user-agent"] || "";
-        const referrer = req.headers["referer"] || "Direct"; 
+    if (!originalUrl) {
+      return res.status(404).json({ msg: "Not found" });
+    }
 
-        const parser = new UAParser(userAgent);
-        const browser = parser.getBrowser().name || "unknown";
-        const device=parser.getDevice().type || "Desktop"
+    const userAgent = req.headers["user-agent"] || "";
+    const referrer = req.get("referer") || "direct";
 
-        const analytics=await AnalyticsModel.create({
-            shortId:OriginalUrl._id,
-            device:device.charAt(0).toUpperCase() + device.slice(1),
-            browser:browser,
-            country: "unknown",
-            referrer: referrer,
-            utm_source: utm_source ? String(utm_source) : undefined,
-            utm_medium: utm_medium ? String(utm_medium) : undefined,
-            utm_campaign: utm_campaign ? String(utm_campaign) : undefined,
-            utm_term: utm_term ? String(utm_term) : undefined,
-            utm_content: utm_content ? String(utm_content) : undefined,
+    const parser = new UAParser(userAgent);
 
-        })
+    const browser = parser.getBrowser().name || "unknown";
+    const deviceType = parser.getDevice().type || "desktop";
 
-        res.status(201).json({
-            success: true,
-            message: "Analytics tracked successfully",
-            data: analytics
-        });
+    const urlObj = new URL(originalUrl.original_Url);
 
-} catch (error) {
+    const utm_source = urlObj.searchParams.get("utm_source");
+    const utm_medium = urlObj.searchParams.get("utm_medium");
+    const utm_campaign = urlObj.searchParams.get("utm_campaign");
+    const utm_term = urlObj.searchParams.get("utm_term");
+    const utm_content = urlObj.searchParams.get("utm_content");
+
+    const analytics = await AnalyticsModel.create({
+      shortId: originalUrl._id,
+      device: deviceType.charAt(0).toUpperCase() + deviceType.slice(1),
+      browser,
+      referrer,
+      utm_source: utm_source || "organic",
+      utm_medium: utm_medium || "none",
+      utm_campaign: utm_campaign || "none",
+      utm_term: utm_term || "none",
+      utm_content: utm_content || "none"
+    });
+
+    return res.status(200).redirect(originalUrl.original_Url)
+
+  } catch (error) {
     console.error("Error in analytics controller:", error);
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-    
-}
-}
 
-export {handleUrlUtm}
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+export { handleUrlUtm };
