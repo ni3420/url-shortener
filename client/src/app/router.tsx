@@ -2,6 +2,7 @@ import {createBrowserRouter} from "react-router-dom"
 import DashboardLayout from "../pages/dashboard/layout";
 import Home from "@/features/dashboard/components/Home";
 import LinkDashboard from "@/features/dashboard/components/LinkDashBoard";
+import AnalyticsPage from "@/features/dashboard/components/analytics";
 
 const Router = createBrowserRouter([
     {
@@ -13,7 +14,12 @@ const Router = createBrowserRouter([
         },{
             path:"links",
             element:<LinkDashboard/>
-        }]
+        },
+        {
+            path:"analytics",
+            element:<AnalyticsPage/>
+        }
+    ]
     }
     
 ])

@@ -61,7 +61,7 @@ const AnalyticsSchema = new Schema<Analytics>({
 
 },{timestamps:true});
 
-AnalyticsSchema.index({ urlId: 1, createdAt: -1 });
+AnalyticsSchema.index({ shortId: 1, createdAt: -1 });
 
 const AnalyticsModel = mongoose.models.Analytics || mongoose.model<Analytics>("Analytics", AnalyticsSchema);
 

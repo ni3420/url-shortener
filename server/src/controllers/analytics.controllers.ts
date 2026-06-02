@@ -53,4 +53,41 @@ const handleUrlUtm = async (req: Request, res: Response) => {
   }
 };
 
-export { handleUrlUtm };
+ const handleGetAllAnalytics = async (req: Request, res: Response) => {
+  try {
+    const analytics = await AnalyticsModel.find();
+    return res.status(200).json({ success: true, data: analytics });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+const handleGetSingleAnalytics = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const analytics = await AnalyticsModel.findOne({shortId:id});
+
+    if (!analytics) {
+      return res.status(404).json({
+        success: false,
+        message: "Analytics not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: analytics
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    });
+  }
+};
+
+export { handleUrlUtm ,handleGetAllAnalytics,handleGetSingleAnalytics}

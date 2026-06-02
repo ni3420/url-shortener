@@ -5,8 +5,8 @@ const SideBar = () => {
   const menuItems = [
     { to: "/home", label: "Home", icon:<HomeIcon/> },
     { to: "/links", label: "links", icon:<Link/> },
-    { to: "/dashboard/users", label: "QR Code", icon: <QrCode/> },
-    { to: "/dashboard/products", label: "analytics", icon:<BarChartBigIcon/>},
+    { to: "/qrcode", label: "QR Code", icon: <QrCode/> },
+    { to: "/analytics", label: "analytics", icon:<BarChartBigIcon/>},
     { to: "/dashboard/settings", label: "Settings", icon: <Settings/> },
   ];
 
