@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface Analytics extends Document {
-    shortId: mongoose.Types.ObjectId;  
+    
+    campaignId: mongoose.Types.ObjectId;  
     device: string;                 
     browser: string;                
     country: string;                
@@ -16,9 +17,9 @@ interface Analytics extends Document {
 }
 
 const AnalyticsSchema = new Schema<Analytics>({
-    shortId: { 
+    campaignId: { 
         type: Schema.Types.ObjectId, 
-        ref: "Url", 
+        ref: "Campaign", 
         required: true 
     },
     device: {
@@ -63,6 +64,6 @@ const AnalyticsSchema = new Schema<Analytics>({
 
 AnalyticsSchema.index({ shortId: 1, createdAt: -1 });
 
-const AnalyticsModel = mongoose.models.Analytics || mongoose.model<Analytics>("Analytics", AnalyticsSchema);
+const AnalyticsModel =  mongoose.model<Analytics>("Analytics", AnalyticsSchema);
 
 export default AnalyticsModel;

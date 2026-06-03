@@ -1,47 +1,57 @@
-import mongoose,{Schema,Document} from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-interface Url extends Document{
-    short_Url:string;
-    original_Url:string;
-    QR_Code:string;
-    TotalClicks:string[]
-    expireAt:Date
-    user?:mongoose.Types.ObjectId
+interface UrlTypes extends Document {
+  shortId: string;
+  originalUrl: string;
+  campaignId?:mongoose.Types.ObjectId;
+  qrCodeUrl?: string;
+  user?: mongoose.Types.ObjectId;
+  expireAt?: Date;
+  clickCount: number;
 }
 
+const UrlSchema = new Schema<UrlTypes>(
+  {
+    shortId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+    campaignId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"Campaign",
+      default:null
+      
+    },
 
-const UrlSchema=new Schema<Url>({
-short_Url:{
-type:String,
-required:true,
-unique:true,
-index:true
-},
+    originalUrl: {
+      type: String,
+      required: true,
+    },
 
-original_Url:{
-    type:String,
-    required:true
-},
-QR_Code:{
-    type:String,
-    required:true
-},
-expireAt:{
-    type:Date,
-    default: Date.now,
-    index:{expires:"1d"}
-},
-// user:{
-//     type:Schema.Types.ObjectId,
-//     ref:"User",
-//     required:true
-// },
-TotalClicks:[{timeStamp:{
-    type:Date,
-}}]
+    qrCodeUrl: {
+      type: String,
+    },
 
-},{timestamps:true})
+    // user: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: "User",
+    // },
 
-const Url=mongoose.model("Url",UrlSchema)
+    expireAt: {
+      type: Date,
+      index: { expires: 0 },
+    },
 
-export default Url
+    clickCount: {
+      type: Number,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
+
+const Url = mongoose.model<UrlTypes>("Url", UrlSchema);
+
+export default Url;

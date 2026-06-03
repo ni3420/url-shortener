@@ -1,53 +1,133 @@
-import { NavLink } from "react-router-dom";
-import {QrCode,BarChartBigIcon,Settings,HomeIcon, Link} from "lucide-react"
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { 
+  HiOutlineChartBar, 
+  HiOutlineLink, 
+  HiOutlineQrCode, 
+  HiOutlineCog6Tooth, 
+  HiOutlineChevronLeft, 
+  HiOutlineChevronRight,
+  HiOutlineArrowLeftOnRectangle,
+  HiOutlineBars3,
+  HiOutlineTv
+} from "react-icons/hi2";
+import { toast } from "sonner";
 
 const SideBar = () => {
-  const menuItems = [
-    { to: "/home", label: "Home", icon:<HomeIcon/> },
-    { to: "/links", label: "links", icon:<Link/> },
-    { to: "/qrcode", label: "QR Code", icon: <QrCode/> },
-    { to: "/analytics", label: "analytics", icon:<BarChartBigIcon/>},
-    { to: "/dashboard/settings", label: "Settings", icon: <Settings/> },
+  const location = useLocation();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileOpen(false);
+  }, [location]);
+
+  const navigation = [
+    { name: "Dashboard", href: "/home", icon: HiOutlineChartBar },
+    { name: "Links", href: "/links", icon: HiOutlineLink },
+    { name: "QR Codes", href: "/qrcodes", icon: HiOutlineQrCode },
+    {name:"Campaigns", href:"/campaigns", icon: HiOutlineChartBar},
+    { name: "Settings", href: "/settings", icon: HiOutlineCog6Tooth },
   ];
 
   return (
-    <div className="drawer-side z-40 h-full">
-      <label htmlFor="sidebar-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-      
-      <div className="w-72 h-full bg-base-100 text-base-content flex flex-col border-r border-base-200">
-        <div className="px-6 py-5 flex items-center gap-2 font-black text-xl tracking-tight bg-base-100">
-          <div className="p-2 bg-primary text-primary-content rounded-xl shadow-md shadow-primary/20">
-            ⚡
+    <>
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="md:hidden fixed top-3 left-4 z-50 btn btn-ghost btn-circle text-base-content bg-base-100/80 backdrop-blur border border-base-300 shadow-sm"
+      >
+        {isMobileOpen ? <HiOutlineTv className="h-6 w-6" /> : <HiOutlineBars3 className="h-6 w-6" />}
+      </button>
+
+      {isMobileOpen && (
+        <div 
+          onClick={() => setIsMobileOpen(false)}
+          className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+        />
+      )}
+
+      <div 
+        className={`fixed inset-y-0 left-0 md:sticky z-40 bg-base-200 border-r border-base-300 flex flex-col justify-between transition-all duration-300 ease-in-out h-screen ${
+          isCollapsed ? "md:w-20" : "md:w-64"
+        } ${
+          isMobileOpen ? "w-64 translate-x-0" : "w-64 -translate-x-full md:translate-x-0"
+        }`}
+      >
+        <div>
+          <div className={`flex items-center h-16 px-4 border-b border-base-300 justify-between ${isCollapsed ? "md:justify-center" : ""}`}>
+            <div className={`flex items-center gap-2.5 font-bold tracking-tight ${isCollapsed ? "md:hidden" : "flex"}`}>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20">
+                <span className="text-lg font-black text-white tracking-tighter">S</span>
+              </div>
+              <span className="text-lg bg-gradient-to-r from-base-content to-base-content/70 bg-clip-text text-transparent">
+                Shortly
+              </span>
+            </div>
+
+            {isCollapsed && (
+              <div className="hidden md:flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20">
+                <span className="text-lg font-black text-white tracking-tighter">S</span>
+              </div>
+            )}
+
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden md:flex absolute -right-3 top-5 btn btn-circle btn-xs border border-base-300 bg-base-100 text-base-content hover:bg-base-200 shadow-sm z-20"
+            >
+              {isCollapsed ? <HiOutlineChevronRight className="h-3 w-3" /> : <HiOutlineChevronLeft className="h-3 w-3" />}
+            </button>
           </div>
-          <span>ShortUrl</span>
+
+          <nav className="p-3 space-y-1">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center gap-3 px-3 h-11 rounded-xl font-medium text-sm transition-all relative group ${
+                    isActive
+                      ? "bg-primary text-primary-content font-semibold shadow-md shadow-primary/10"
+                      : "text-base-content/70 hover:bg-base-300 hover:text-base-content"
+                  } ${isCollapsed ? "md:justify-center" : ""}`}
+                >
+                  <Icon className={`h-5 w-5 shrink-0 ${isActive ? "text-current" : "text-base-content/60 group-hover:text-base-content"}`} />
+                  
+                  <span className={`${isCollapsed ? "md:hidden" : "block"}`}>{item.name}</span>
+
+                  {isCollapsed && (
+                    <div className="hidden md:block absolute left-full ml-4 px-2.5 py-1.5 bg-neutral text-neutral-content text-xs rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl border border-neutral-focus">
+                      {item.name}
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        <ul className="menu menu-md px-4 py-6 flex-1 gap-1.5 font-medium overflow-y-auto">
-          {menuItems.map((item) => (
-            <li key={item.to}>
-              <NavLink 
-                to={item.to} 
-                className={({ isActive }) => 
-                  `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive 
-                      ? "active bg-primary text-primary-content font-semibold shadow-lg shadow-primary/20" 
-                      : "hover:bg-base-200"
-                  }`
-                }
-              >
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        <div className="p-3 border-t border-base-300">
+          <button
+            onClick={() => toast.success("Logged out successfully")}
+            className={`w-full flex items-center gap-3 px-3 h-11 rounded-xl font-medium text-sm text-error hover:bg-error/10 transition-all relative group ${
+              isCollapsed ? "md:justify-center" : ""
+            }`}
+          >
+            <HiOutlineArrowLeftOnRectangle className="h-5 w-5 shrink-0" />
+            
+            <span className={`${isCollapsed ? "md:hidden" : "block"}`}>Logout</span>
 
-        <div className="p-4 mx-4 mb-4 bg-base-200/50 rounded-2xl flex items-center justify-between text-xs font-medium opacity-60 mt-auto">
-          <span>© 2026 My App</span>
-          <div className="badge badge-sm badge-ghost font-bold">v1.0</div>
+            {isCollapsed && (
+              <div className="hidden md:block absolute left-full ml-4 px-2.5 py-1.5 bg-error text-error-content text-xs rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 shadow-xl">
+                Logout
+              </div>
+            )}
+          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

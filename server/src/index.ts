@@ -3,6 +3,8 @@ import dotenv from "dotenv"
 import DB from "./db/dbconnection"
 import urlRouter from "./routes/url.routes"
 import userRouter from "./routes/user.routes"
+import CampaignRouter from "./routes/campaign.routes"
+import AnalyticsRouter from "./routes/analytics.routes"
 import cookie from "cookie-parser"
 import cors from "cors"
 import auth from "./middlewares/auth"
@@ -18,7 +20,9 @@ app.use(cookie())
 
 
 app.use("/api/auth",userRouter)
-app.use("/api",urlRouter)
+app.use("/api/url",urlRouter)
+app.use("/api/campaign",CampaignRouter)
+app.use("/api/analytics",AnalyticsRouter)
 
 
 
