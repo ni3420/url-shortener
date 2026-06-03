@@ -4,27 +4,48 @@ import crypto from "crypto"
 import QRcode from "qrcode"
 
 
-const handleUrl=async(req:Request,res:Response)=>{
-    try {
-        const data = Object.values(req.body)[0];
-        
-        if(!data) return res.status(400).json({msg:"url is required"})
-        const shortCode: string = crypto.randomBytes(8).toString('base64url').substring(0, 6);
-        const url=await Url.create({
-            short_Url:shortCode,
-            original_Url:"https://"+(data as string).trim().replace(/^https?:\/\//, ''),
-            QR_Code:await QRcode.toDataURL(`http://localhost:3000/${shortCode}`)
-            
-        })
-        return res.status(201).json({msg:"url created"})
-    } catch (error) {
-        console.log(error)      
-    }
-}
+const handleUrl = async (req: Request, res: Response) => {
+  try {
+    const { originalUrl, campaignId } = req.body;
 
+    if (!campaignId) {
+      return res.status(400).json({ msg: "campaign is required" });
+    }
+
+    let cleanUrl = originalUrl.trim();
+
+    if (!/^https?:\/\//i.test(cleanUrl)) {
+      cleanUrl = "https://" + cleanUrl;
+    }
+
+    const shortCode = crypto
+      .randomBytes(8)
+      .toString("base64url")
+      .substring(0, 6);
+
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+
+    const qrCodeUrl = await QRcode.toDataURL(`${baseUrl}/${shortCode}`);
+
+    const url = await Url.create({
+      shortId: shortCode,
+      originalUrl: cleanUrl,
+      qrCodeUrl,
+      campaignId: campaignId || null,
+    });
+
+    return res.status(201).json({
+      msg: "url created",
+      data: url,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ msg: "server error" });
+  }
+};
 const handleShowUrl=async(req:Request,res:Response)=>{
     try {
-        const urls=await Url.find({})
+        const urls=await Url.find({}).populate("campaignId")
         if(urls.length==0) return res.json({"msg":"not found the url"})
 res.send(urls)            
 
@@ -49,8 +70,9 @@ const handleUrlDeletion=async(req:Request,res:Response)=>{
 const handleOriginalUrl=async(req:Request,res:Response)=>{
     try {
         const url=req.params.shortId;
+        console.log("hii")
         if(!url) return res.status(404).json({"msg":"url not found"})
-            const UrlData=await Url.findOneAndUpdate({short_Url:url},{
+            const UrlData=await Url.findOneAndUpdate({shortId:url},{
         $push:{
             TotalClicks:{
                 timeStamp:Date.now()
@@ -58,7 +80,7 @@ const handleOriginalUrl=async(req:Request,res:Response)=>{
         }})
         if(!UrlData) return res.status(400).json({"msg":"not any url found"})
             
-         return   res.json({"original_Url":`${UrlData.original_Url}`})
+         return   res.json({"original_Url":`${UrlData.originalUrl}`})
     } catch (error) {
         console.log(error)
         

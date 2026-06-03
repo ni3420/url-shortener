@@ -1,93 +1,137 @@
 import type { Request, Response } from "express";
+import mongoose from "mongoose";
 import AnalyticsModel from "../models/analytics.models";
-import { UAParser } from "ua-parser-js";
 import Url from "../models/url.models";
 
-const handleUrlUtm = async (req: Request, res: Response) => {
+export const getCampaignOverview = async (req: Request, res: Response) => {
   try {
-    const { shortId } = req.params;
+    const { campaignId } = req.params;
 
-    const originalUrl = await Url.findOne({ short_Url: shortId });
-
-    if (!originalUrl) {
-      return res.status(404).json({ msg: "Not found" });
+    if (!mongoose.Types.ObjectId.isValid(campaignId as string)) {
+      return res.status(400).json({ success: false, message: "Invalid Campaign ID" });
     }
 
-    const userAgent = req.headers["user-agent"] || "";
-    const referrer = req.get("referer") || "direct";
+    const totalLinks = await Url.countDocuments({ campaignId });
 
-    const parser = new UAParser(userAgent);
+    const totalClicksResult = await AnalyticsModel.aggregate([
+      { $match: { campaignId: new mongoose.Types.ObjectId(campaignId as string) } },
+      { $count: "totalClicks" }
+    ]);
 
-    const browser = parser.getBrowser().name || "unknown";
-    const deviceType = parser.getDevice().type || "desktop";
-
-    const urlObj = new URL(originalUrl.original_Url);
-
-    const utm_source = urlObj.searchParams.get("utm_source");
-    const utm_medium = urlObj.searchParams.get("utm_medium");
-    const utm_campaign = urlObj.searchParams.get("utm_campaign");
-    const utm_term = urlObj.searchParams.get("utm_term");
-    const utm_content = urlObj.searchParams.get("utm_content");
-
-    const analytics = await AnalyticsModel.create({
-      shortId: originalUrl._id,
-      device: deviceType.charAt(0).toUpperCase() + deviceType.slice(1),
-      browser,
-      referrer,
-      utm_source: utm_source || "organic",
-      utm_medium: utm_medium || "none",
-      utm_campaign: utm_campaign || "none",
-      utm_term: utm_term || "none",
-      utm_content: utm_content || "none"
-    });
-
-    return res.status(200).redirect(originalUrl.original_Url)
-
-  } catch (error) {
-    console.error("Error in analytics controller:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error"
-    });
-  }
-};
-
- const handleGetAllAnalytics = async (req: Request, res: Response) => {
-  try {
-    const analytics = await AnalyticsModel.find();
-    return res.status(200).json({ success: true, data: analytics });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error"
-    });
-  }
-};
-
-const handleGetSingleAnalytics = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-
-    const analytics = await AnalyticsModel.findOne({shortId:id});
-
-    if (!analytics) {
-      return res.status(404).json({
-        success: false,
-        message: "Analytics not found"
-      });
-    }
+    const totalClicks = totalClicksResult[0]?.totalClicks || 0;
 
     return res.status(200).json({
       success: true,
-      data: analytics
+      data: {
+        totalLinks,
+        totalClicks
+      }
     });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error"
+  } catch (error: any) {
+    console.error("Error in getCampaignOverview:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+
+export const getCampaignBreakdown = async (req: Request, res: Response) => {
+  try {
+    const { campaignId } = req.params;
+    const cid = new mongoose.Types.ObjectId(campaignId as string);
+
+    const breakdown = await AnalyticsModel.aggregate([
+      { $match: { campaignId: cid } },
+      {
+        $facet: {
+          devices: [
+            { $group: { _id: "$device", count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+          ],
+          browsers: [
+            { $group: { _id: "$browser", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 } 
+          ],
+          countries: [
+            { $group: { _id: "$country", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 5 } 
+          ]
+        }
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: breakdown[0]
     });
+  } catch (error: any) {
+    console.error("Error in getCampaignBreakdown:", error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export { handleUrlUtm ,handleGetAllAnalytics,handleGetSingleAnalytics}
+export const getCampaignUtmStats = async (req: Request, res: Response) => {
+  try {
+    const { campaignId } = req.params;
+    const cid = new mongoose.Types.ObjectId(campaignId as string);
+
+    const utmStats = await AnalyticsModel.aggregate([
+      { $match: { campaignId: cid } },
+      {
+        $facet: {
+          sources: [
+            { $group: { _id: "$utm_source", count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+          ],
+          mediums: [
+            { $group: { _id: "$utm_medium", count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+          ]
+        }
+      }
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: utmStats[0]
+    });
+  } catch (error: any) {
+    console.error("Error in getCampaignUtmStats:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+export const getCampaignTimeline = async (req: Request, res: Response) => {
+  try {
+    const { campaignId } = req.params;
+    const cid = new mongoose.Types.ObjectId(campaignId as string);
+
+    const timeline = await AnalyticsModel.aggregate([
+      { $match: { campaignId: cid } },
+      {
+        $project: {
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }
+        }
+      },
+      {
+        $group: {
+          _id: "$date",
+          clicks: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }, 
+      { $limit: 30 } 
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      data: timeline
+    });
+  } catch (error: any) {
+    console.error("Error in getCampaignTimeline:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
