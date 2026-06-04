@@ -6,13 +6,13 @@ import QRcode from "qrcode"
 
 const handleUrl = async (req: Request, res: Response) => {
   try {
-    const { originalUrl, campaignId } = req.body;
-
-    if (!campaignId) {
-      return res.status(400).json({ msg: "campaign is required" });
+    const { urls } = req.body ;
+    if(!urls)
+    {
+      return res.json({"msg":"url required"})
     }
 
-    let cleanUrl = originalUrl.trim();
+    let cleanUrl = urls.trim() as string
 
     if (!/^https?:\/\//i.test(cleanUrl)) {
       cleanUrl = "https://" + cleanUrl;
@@ -31,7 +31,6 @@ const handleUrl = async (req: Request, res: Response) => {
       shortId: shortCode,
       originalUrl: cleanUrl,
       qrCodeUrl,
-      campaignId: campaignId || null,
     });
 
     return res.status(201).json({
@@ -43,17 +42,36 @@ const handleUrl = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "server error" });
   }
 };
-const handleShowUrl=async(req:Request,res:Response)=>{
-    try {
-        const urls=await Url.find({}).populate("campaignId")
-        if(urls.length==0) return res.json({"msg":"not found the url"})
-res.send(urls)            
+const handleShowUrl = async (req: Request, res: Response) => {
+  try {
+    // Only find URLs where campaignId is explicitly null or does not exist
+    const urls = await Url.find({
+      $or: [
+        { campaignId: null },
+        { campaignId: { $exists: false } }
+      ]
+    });
 
-    } catch (error) {
-        console.log(error)
+    if (!urls || urls.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No unassigned standalone redirect shortcuts discovered in database index."
+      });
     }
-}
 
+    return res.status(200).json({
+      success: true,
+      data: urls
+    });
+
+  } catch (error: any) {
+    console.error("Error inside handleShowUrl controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error reading URL registry metadata lines."
+    });
+  }
+};
 const handleUrlDeletion=async(req:Request,res:Response)=>{
     try {
           const data = Object.values(req.body)[0];
@@ -70,17 +88,11 @@ const handleUrlDeletion=async(req:Request,res:Response)=>{
 const handleOriginalUrl=async(req:Request,res:Response)=>{
     try {
         const url=req.params.shortId;
-        console.log("hii")
         if(!url) return res.status(404).json({"msg":"url not found"})
-            const UrlData=await Url.findOneAndUpdate({shortId:url},{
-        $push:{
-            TotalClicks:{
-                timeStamp:Date.now()
-            }
-        }})
+            const UrlData=await Url.findOneAndUpdate({shortId:url},{$inc:{clickCount:1}})
         if(!UrlData) return res.status(400).json({"msg":"not any url found"})
             
-         return   res.json({"original_Url":`${UrlData.originalUrl}`})
+         return   res.redirect(UrlData.originalUrl)
     } catch (error) {
         console.log(error)
         

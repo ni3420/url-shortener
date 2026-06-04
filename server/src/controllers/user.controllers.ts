@@ -45,13 +45,13 @@ const handleRegister = async (req: Request, res: Response) => {
             });
         }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        // const salt = await bcrypt.genSalt(10);
+        // const hashedPassword = await bcrypt.hash(password, salt);
 
         const user = await UserModel.create({ 
             email, 
             name, 
-            password: hashedPassword 
+            password,
         });    
 
         return res.status(201).json({ 
@@ -87,7 +87,8 @@ const handleLogin = async (req: Request, res: Response) => {
             });
         }  
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password as string, user.password);
+        console.log(isMatch)
         if (!isMatch) {
             return res.status(401).json({ 
                 success: false,
@@ -118,4 +119,23 @@ const handleLogin = async (req: Request, res: Response) => {
     }
 }
 
-export { handleLogin, handleRegister, handleGetCurrentUser };
+const handleLogout = async (req: Request, res: Response) => {
+  try {
+    res.cookie("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(0), 
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Session terminated successfully"
+    });
+  } catch (error: any) {
+    console.error("Error in handleLogout:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export { handleLogin, handleRegister, handleGetCurrentUser, handleLogout };
