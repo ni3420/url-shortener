@@ -23,7 +23,6 @@ const UserSchema=new Schema<User>({
         index:true,
         lowercase:true,
         trim: true,
-        match: [/\S+@\S+\.\S+/, 'Please use a valid email address']
     },
     password:{
         type:String,

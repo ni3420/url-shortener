@@ -4,8 +4,9 @@ interface UrlTypes extends Document {
   shortId: string;
   originalUrl: string;
   campaignId?:mongoose.Types.ObjectId;
+  title?:string
   qrCodeUrl?: string;
-  user?: mongoose.Types.ObjectId;
+  userId?: mongoose.Types.ObjectId;
   expireAt?: Date;
   clickCount: number;
 }
@@ -24,6 +25,9 @@ const UrlSchema = new Schema<UrlTypes>(
       default:null
       
     },
+    title:{
+      type:String
+    },
 
     originalUrl: {
       type: String,
@@ -34,10 +38,10 @@ const UrlSchema = new Schema<UrlTypes>(
       type: String,
     },
 
-    // user: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "User",
-    // },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
 
     expireAt: {
       type: Date,

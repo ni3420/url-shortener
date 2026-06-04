@@ -2,7 +2,8 @@ import mongoose ,{Document,Schema}from "mongoose";
 
 interface CampaignType extends Document{
     title:string,
-    tags?:string[]
+    tags?:string[],
+    links?:Schema.Types.ObjectId[]
 }
 
 const CampaignSchema=new Schema<CampaignType>({
@@ -13,8 +14,13 @@ const CampaignSchema=new Schema<CampaignType>({
     tags:{
         type:[String],
         default:[]
-    }
-
+    },
+    links: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Url",
+      },
+    ],
 
 
 },{timestamps:true})
