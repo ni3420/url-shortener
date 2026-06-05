@@ -2,11 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, Navigate} from "react-router-dom";
 import { useState } from "react";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineLockClosed, HiEye, HiEyeOff } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useLogin } from "../api/use-login";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -16,6 +17,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginCard = () => {
+  const {mutateAsync}=useLogin()
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSocialLoading, setIsSocialLoading] = useState<"google" | "github" | null>(null);
@@ -34,12 +36,17 @@ const LoginCard = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
+    mutateAsync(data,{
+      onSuccess:()=>{
 
-    toast.success("Welcome back to Shortly!", {
-      description: `Successfully logged in as ${data.email}`,
-    });
+        toast.success(`welcome back to shortly`);
+      },
+      onError:()=>{
+        toast.error("something is wrong")
+      }
+    })
+    
+    setIsLoading(false);
   };
 
   const handleSocialLogin = async (provider: "google" | "github") => {

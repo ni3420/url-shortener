@@ -1,16 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
-export const useGetAllCampaigns = () => {
+export const useCurrentUser = () => {
   return useQuery({
-    queryKey: ["campaigns"],
+    queryKey: ["current-user"],
     queryFn: async () => {
-      const res = await api.get("/campaign");
+      const res = await api.get("/auth/current");
       return res.data;
     },
-    staleTime: 1000 * 60 * 2,
-    gcTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 15,
+    gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    retry: 1,
   });
 };

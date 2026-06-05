@@ -1,17 +1,16 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+"use client";
+
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import api from "@/lib/api";
-import { useGetAllCampaigns } from "@/features/Campaigns/api/use-getAllCampaign"; // Update this path to where your hook lives
+import { useGetAllCampaigns } from "@/features/Campaigns/api/use-getAllCampaign";
 import { toast } from "sonner";
 import { 
   HiOutlineFolder, 
   HiOutlineCalendar, 
   HiOutlineTag, 
   HiOutlineTrash, 
-  HiOutlineArrowLongRight,
-  HiOutlineMagnifyingGlass,
-  HiOutlineFunnel
+  HiOutlineArrowLongRight
 } from "react-icons/hi2";
 
 interface CampaignItem {
@@ -22,15 +21,14 @@ interface CampaignItem {
   createdAt: string;
 }
 
-const ListCampaignCard = () => {
-  const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
-  const [selectedTag, setSelectedTag] = useState("all");
+interface ListCampaignCardProps {
+  searchFilter: string;
+}
 
-  // Using your imported structural hook custom instance
+const ListCampaignCard = ({ searchFilter }: ListCampaignCardProps) => {
+  const queryClient = useQueryClient();
   const { data: response, isLoading, error } = useGetAllCampaigns();
   
-  // Safe extraction matching your back-end payload wrapper architecture
   const campaigns: CampaignItem[] = response?.data || [];
 
   const deleteCampaignMutation = useMutation({
@@ -62,48 +60,16 @@ const ListCampaignCard = () => {
     );
   }
 
-  const uniqueTags = ["all", ...Array.from(new Set(campaigns.map((c) => c.tag).filter(Boolean)))];
-
   const filteredCampaigns = campaigns.filter((campaign) => {
-    const matchesSearch = campaign.title.toLowerCase().includes(search.toLowerCase()) ||
-                          campaign.originalUrl.toLowerCase().includes(search.toLowerCase());
-    const matchesTag = selectedTag === "all" || campaign.tag === selectedTag;
-    return matchesSearch && matchesTag;
+    return (
+      campaign.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      campaign.originalUrl?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      (campaign.tag && campaign.tag?.toLowerCase().includes(searchFilter.toLowerCase()))
+    );
   });
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6 text-base-content antialiased">
-      
-      {/* FILTER & SEARCH CONTROL BLOCK */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-4 bg-base-200/40 backdrop-blur-md p-4 rounded-2xl border border-base-300 dark:border-zinc-800 shadow-sm">
-        <div className="md:col-span-8 relative flex items-center">
-          <HiOutlineMagnifyingGlass className="absolute left-4 text-base-content/40 h-5 w-5 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search campaigns by title or destination URL..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="input input-bordered w-full h-11 pl-12 bg-base-100 dark:bg-zinc-900 placeholder:opacity-40 focus:outline-none focus:border-indigo-500 transition-all"
-          />
-        </div>
-
-        <div className="md:col-span-4 relative flex items-center">
-          <HiOutlineFunnel className="absolute left-4 text-base-content/40 h-5 w-5 pointer-events-none" />
-          <select
-            value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
-            className="select select-bordered w-full h-11 pl-12 bg-base-100 dark:bg-zinc-900 focus:outline-none focus:border-indigo-500 transition-all"
-          >
-            {uniqueTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag === "all" ? "All Campaign Tags" : tag}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* CAMPAIGNS GRID DISPLAY */}
+    <div className="w-full mx-auto space-y-6 text-base-content antialiased">
       {filteredCampaigns.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredCampaigns.map((campaign) => (
@@ -167,7 +133,7 @@ const ListCampaignCard = () => {
           <HiOutlineFolder className="h-12 w-12 text-base-content/20 mb-3" />
           <h3 className="text-sm font-bold tracking-tight">No tracking campaigns discovered</h3>
           <p className="text-xs text-base-content/40 font-medium max-w-xs mt-0.5">
-            Modify your query inputs or initiate deployment workflows to create structural monitoring instances.
+            Modify your search criteria or initiate deployment workflows to create structural monitoring instances.
           </p>
         </div>
       )}

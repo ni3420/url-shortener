@@ -11,8 +11,6 @@ export const useCreateCampaign = () => {
   return useMutation({
     mutationFn: async (data: CampaignInput) => {
       const res = await api.post("/campaign", data);
-      
-      console.log(data)
       return res.data;
     },
     onSuccess: () => {

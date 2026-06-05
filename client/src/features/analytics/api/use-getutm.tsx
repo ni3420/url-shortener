@@ -7,8 +7,13 @@ export const useGetCampaignUtmStats = (campaignId: string | undefined) => {
     queryKey: ["campaign", "utm", campaignId],
     queryFn: async () => {
       const { data } = await axios.get<BaseResponse<CampaignUtmData>>(
-        `/api/campaign/${campaignId}/utm`
+        `/api/analytics/${campaignId}/utm`
       );
+      console.log(data)
+      if(!data)
+      {
+        console.log("error")
+      }
       return data.data;
     },
     enabled: !!campaignId,

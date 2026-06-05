@@ -1,24 +1,27 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { useState } from "react";
 import { 
-  HiOutlineLink, 
   HiOutlineTag, 
   HiOutlineDocumentText,
   HiOutlineRocketLaunch
 } from "react-icons/hi2";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useCreateCampaign } from "../api/use-createcampaign";
+import { campaignSchema } from "../Schema";
 
-import {campaignSchema} from "../Schema"
+interface CreateCampaignProps {
+  onSuccessLaunch: () => void;
+}
 
 type CampaignFormValues = z.infer<typeof campaignSchema>;
 
-const CreateCampaignForm = () => {
+const CreateCampaignForm = ({onSuccessLaunch}:CreateCampaignProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const {mutateAsync}=useCreateCampaign()
+  const { mutateAsync } = useCreateCampaign();
 
   const {
     register,
@@ -29,24 +32,25 @@ const CreateCampaignForm = () => {
     resolver: zodResolver(campaignSchema),
     defaultValues: {
       title: "",
-      originalUrl: "",
       tag: undefined,
     },
   });
 
   const onSubmit = async (data: CampaignFormValues) => {
     setIsLoading(true);
-mutateAsync(data,{
-  onError:()=>{
-    console.log("not create")
-  }
-})
-    setIsLoading(false);
+    mutateAsync(data, {
+      onSuccess: () => {
+        toast.success("Campaign deployed successfully!");
+        reset();
+        onSuccessLaunch()
 
-    // toast.success("Campaign deployed successfully!", {
-    //   description: `"${data.title}" is now active and ready for tracking.`,
-    // });
-    // reset();
+      },
+      onError: () => {
+        toast.error("Failed to deploy campaign.")
+        console.log("not create");
+      }
+    });
+    setIsLoading(false);
   };
 
   return (
@@ -93,34 +97,6 @@ mutateAsync(data,{
               {errors.title && (
                 <label className="label py-0.5">
                   <span className="label-text-alt text-error font-medium">{errors.title.message}</span>
-                </label>
-              )}
-            </div>
-
-            <div className="form-control w-full gap-1.5">
-              <label htmlFor="originalUrl" className="label p-0">
-                <span className="label-text text-xs sm:text-sm font-semibold text-base-content/70 dark:text-zinc-300">
-                  Destination URL
-                </span>
-              </label>
-              <div className="relative flex items-center">
-                <div className="absolute left-4 text-base-content/40 dark:text-zinc-500 pointer-events-none">
-                  <HiOutlineLink className="h-5 w-5" />
-                </div>
-                <input
-                  id="originalUrl"
-                  type="text"
-                  placeholder="https://yourwebsite.com/deep/path/to/product"
-                  disabled={isLoading}
-                  {...register("originalUrl")}
-                  className={`input input-bordered w-full h-12 pl-12 bg-base-200/30 dark:bg-zinc-950/40 border-base-300 dark:border-zinc-800 text-sm placeholder:opacity-40 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-all ${
-                    errors.originalUrl ? "input-error bg-error/5 border-error/50 focus:border-error" : ""
-                  }`}
-                />
-              </div>
-              {errors.originalUrl && (
-                <label className="label py-0.5">
-                  <span className="label-text-alt text-error font-medium">{errors.originalUrl.message}</span>
                 </label>
               )}
             </div>

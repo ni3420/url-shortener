@@ -1,7 +1,7 @@
 import {z} from "zod"
 
 export const CreateLinkSchema=z.object({
-    url: z
+    urls: z
        .string()
        .min(1, { message: "URL is required" })
        .url({ message: "Please enter a valid URL" }),

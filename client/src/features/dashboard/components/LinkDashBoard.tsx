@@ -3,8 +3,10 @@ import { HiOutlineArrowLeft, HiOutlineLink, HiOutlinePlus } from "react-icons/hi
 import SearchInput from "@/components/SearchInput";
 import FilterBar from "@/components/FilterBar";
 import LinkList from "@/components/LinkList";
+import { useNavigate} from "react-router-dom";
 
 const LinkDashboard = () => {
+  const navigate=useNavigate()
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [sort, setSort] = useState("latest");
@@ -40,7 +42,7 @@ const LinkDashboard = () => {
         </div>
 
         <div className="self-stretch sm:self-auto flex">
-          <button className="btn btn-primary w-full sm:w-auto h-11 min-h-[2.75rem] px-5 bg-gradient-to-r from-indigo-500 to-violet-600 border-none text-white font-medium normal-case rounded-xl shadow-lg shadow-indigo-500/10 hover:from-indigo-600 hover:to-violet-700 active:scale-[0.98] transition-all gap-2">
+          <button onClick={()=>{navigate("/home")}} className="btn btn-primary w-full sm:w-auto h-11 min-h-[2.75rem] px-5 bg-gradient-to-r from-indigo-500 to-violet-600 border-none text-white font-medium normal-case rounded-xl shadow-lg shadow-indigo-500/10 hover:from-indigo-600 hover:to-violet-700 active:scale-[0.98] transition-all gap-2">
             <HiOutlinePlus className="h-4 w-4" />
             <span>Create New Link</span>
           </button>

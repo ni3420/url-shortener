@@ -3,46 +3,45 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   HiOutlineChartBar, 
   HiOutlineLink, 
-  HiOutlineQrCode, 
-  HiOutlineCog6Tooth, 
+  // HiOutlineCog6Tooth, 
   HiOutlineChevronLeft, 
   HiOutlineChevronRight,
-  HiOutlineArrowLeftOnRectangle,
-  HiOutlineBars3,
-  HiOutlineTv
+  HiOutlineArrowLeftOnRectangle
 } from "react-icons/hi2";
-import { toast } from "sonner";
+import { useLogout } from "@/features/auth/api/use-logout";
 
-const SideBar = () => {
+interface SideBarProps {
+  isMobileOpen: boolean;
+  setIsMobileOpen: (open: boolean) => void;
+}
+
+const SideBar = ({ isMobileOpen, setIsMobileOpen }: SideBarProps) => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { mutate } = useLogout();
 
   useEffect(() => {
     setIsMobileOpen(false);
-  }, [location]);
+  }, [location, setIsMobileOpen]);
 
   const navigation = [
     { name: "Dashboard", href: "/home", icon: HiOutlineChartBar },
     { name: "Links", href: "/links", icon: HiOutlineLink },
-    { name: "QR Codes", href: "/qrcodes", icon: HiOutlineQrCode },
-    {name:"Campaigns", href:"/campaigns", icon: HiOutlineChartBar},
-    { name: "Settings", href: "/settings", icon: HiOutlineCog6Tooth },
+    // { name: "QR Codes", href: "/qrcodes", icon: HiOutlineQrCode },
+    { name: "Campaigns", href: "/campaigns", icon: HiOutlineChartBar },
+    // { name: "Settings", href: "/settings", icon: HiOutlineCog6Tooth },
   ];
+
+  const handleLogout = () => {
+    mutate();
+  };
 
   return (
     <>
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="md:hidden fixed top-3 left-4 z-50 btn btn-ghost btn-circle text-base-content bg-base-100/80 backdrop-blur border border-base-300 shadow-sm"
-      >
-        {isMobileOpen ? <HiOutlineTv className="h-6 w-6" /> : <HiOutlineBars3 className="h-6 w-6" />}
-      </button>
-
       {isMobileOpen && (
         <div 
           onClick={() => setIsMobileOpen(false)}
-          className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+          className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
         />
       )}
 
@@ -110,7 +109,7 @@ const SideBar = () => {
 
         <div className="p-3 border-t border-base-300">
           <button
-            onClick={() => toast.success("Logged out successfully")}
+            onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 h-11 rounded-xl font-medium text-sm text-error hover:bg-error/10 transition-all relative group ${
               isCollapsed ? "md:justify-center" : ""
             }`}

@@ -5,7 +5,7 @@ import api from "@/lib/api";
 export const useCreateLink=()=>{
     const Mutation=useMutation({
         mutationFn:async(data:CreateLinkFormInput)=>{
-            const res=await api.post("/",data)
+            const res=await api.post("/url",data)
             return res.data
         }
     })

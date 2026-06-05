@@ -5,7 +5,8 @@ export const useGetAllLinks=()=>{
     const query=useQuery({
         queryKey:["links"],
         queryFn:async()=>{
-            const res=await api.get("/")
+            const res=await api.get("/url")
+            console.log(res.data)
             return res.data
         }
     })

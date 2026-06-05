@@ -2,11 +2,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import { HiOutlineMail, HiOutlineLockClosed, HiOutlineUser, HiEye, HiEyeOff } from "react-icons/hi";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useSignUp } from "../api/use-register";
+import { isAxiosError } from "axios";
 
 const signUpSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,6 +23,7 @@ const signUpSchema = z.object({
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 
 const SignUpCard = () => {
+  const {mutateAsync}=useSignUp()
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,15 +42,28 @@ const SignUpCard = () => {
       confirmPassword: "",
     },
   });
-
-  const onSubmit = async (data: SignUpFormValues) => {
+  const navigate=useNavigate()
+const onSubmit = async (data: SignUpFormValues) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-
-    toast.success("Account created successfully!", {
-      description: `Welcome to Shortly, ${data.name}!`,
-    });
+    try {
+      await mutateAsync({
+        name: data.name,
+        email: data.email,
+        password: data.password
+      });
+      toast.success("User registered successfully");
+      navigate("/home");
+    } catch (err:any) {
+      const statusCode = err?.response?.status;
+      
+      if (statusCode === 409) {
+        toast.error("User already exists with this email address.");
+      } else {
+        toast.error(err?.response?.data?.message || "Something went wrong try later");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialSignUp = async (provider: "google" | "github") => {

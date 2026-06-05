@@ -1,50 +1,51 @@
-import { useState } from "react";
+"use client";
+
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useGetCampaignById } from "@/features/Campaigns/api/use-getcampaignbyId";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { 
   HiOutlineLink, 
   HiOutlineShare, 
   HiOutlineTrash, 
-  HiOutlineMagnifyingGlass,
   HiOutlineSquare2Stack,
   HiOutlineCalendar,
+  HiOutlineEye,
 } from "react-icons/hi2";
 import { HiOutlineCursorClick } from "react-icons/hi";
+
 interface LinkItem {
   _id: string;
   title: string;
-  shortUrl: string;
+  shortId: string;
   originalUrl: string;
-  clicks: number;
+  clickCount: number;
   createdAt: string;
 }
 
-const CampaignLinkList = () => {
+const LinkList = () => {
   const { campaignId } = useParams<{ campaignId: string }>();
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const { data: response, isLoading, error } = useQuery({
-    queryKey: ["campaign", "links", campaignId],
-    queryFn: async () => {
-      const res = await api.get(`/campaign/${campaignId}/links`);
-      return res.data;
-    },
-    enabled: !!campaignId,
-  });
-
-  const campaignLinks: LinkItem[] = response?.data || [];
+  const { data: response, isLoading, error } = useGetCampaignById(campaignId as string);
+  console.log(response)
+  
+  const campaignLinks: LinkItem[] = response?.data?.links || [];
+  const campaignTitle = response?.title || "Campaign Links";
 
   const deleteLinkMutation = useMutation({
     mutationFn: async (linkId: string) => {
-      await api.delete(`/links/${linkId}`);
+      await api.delete(`/url`, { data: { linkId } });
     },
     onSuccess: () => {
-      toast.success("Shortened link deleted permanently");
-      queryClient.invalidateQueries({ queryKey: ["campaign", "links", campaignId] });
+      toast.success("Shortened tracking link removed");
+      
+      // Forces background updates across any query key tracking active campaigns
+      queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["campaign", campaignId] });
     },
     onError: () => {
       toast.error("Failed to delete link resource");
@@ -53,54 +54,50 @@ const CampaignLinkList = () => {
 
   const handleCopy = async (id: string, text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      const baseUrl = window.location.origin;
+      await navigator.clipboard.writeText(`${baseUrl}/api/url/${text}/campaign`);
       setCopiedId(id);
-      toast.success("Link copied to clipboard");
+      toast.success("Short link copied!");
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      toast.error("Failed to copy link text");
+      toast.error("Failed to copy link");
     }
   };
 
   if (isLoading) {
     return (
-      <div className="w-full h-[40vh] flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="w-full h-48 flex items-center justify-center bg-base-200/20 dark:bg-zinc-900/10 border border-base-300 dark:border-zinc-800 rounded-2xl animate-pulse">
+        <div className="space-y-3 w-full px-6">
+          <div className="h-5 w-1/3 bg-base-300 dark:bg-zinc-800 rounded-lg" />
+          <div className="h-20 w-full bg-base-300 dark:bg-zinc-800 rounded-xl" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="alert alert-error max-w-xl mx-auto rounded-xl shadow-lg text-white">
-        <span>Failed to sync database link records. Verify server configuration states.</span>
+      <div className="alert alert-error rounded-xl text-white shadow-md max-w-xl mx-auto my-4">
+        <span>Error linking data pipeline stream. Refresh browser state context.</span>
       </div>
     );
   }
 
-  const filteredLinks = campaignLinks.filter((link) =>
-    link.title?.toLowerCase().includes(search.toLowerCase()) ||
-    link.shortUrl?.toLowerCase().includes(search.toLowerCase()) ||
-    link.originalUrl?.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-6 space-y-6 text-base-content antialiased">
-      
-      <div className="w-full relative flex items-center bg-base-200/40 backdrop-blur-md p-3 rounded-2xl border border-base-300 dark:border-zinc-800 shadow-sm">
-        <HiOutlineMagnifyingGlass className="absolute left-7 text-base-content/40 h-5 w-5 pointer-events-none" />
-        <input
-          type="text"
-          placeholder="Search grouped items by title, alias, or target configuration mapping..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="input input-bordered w-full h-11 pl-12 bg-base-100 dark:bg-zinc-900 border-base-300 dark:border-zinc-800 focus:outline-none focus:border-indigo-500 transition-all text-sm placeholder:opacity-40"
-        />
+    <div className="w-full max-w-5xl mx-auto px-4 py-2 space-y-4 text-base-content antialiased">
+      <div className="flex items-center justify-between border-b border-base-200 dark:border-zinc-800 pb-3">
+        <div>
+          <h3 className="text-lg font-bold tracking-tight">{campaignTitle}</h3>
+          <p className="text-xs text-base-content/50 font-medium">Grouped tracking nodes deployed inside this profile scope.</p>
+        </div>
+        <div className="badge badge-sm font-bold bg-base-200 dark:bg-zinc-800 border-none rounded-lg p-3">
+          {campaignLinks.length} Links total
+        </div>
       </div>
 
-      {filteredLinks.length > 0 ? (
+      {campaignLinks.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredLinks.map((link) => (
+          {campaignLinks.map((link) => (
             <div
               key={link._id}
               className="group bg-base-100 dark:bg-zinc-900 border border-base-300 dark:border-zinc-800 rounded-2xl p-5 shadow-xl shadow-base-content/5 flex flex-col justify-between transition-all duration-300 hover:border-indigo-500/30"
@@ -109,16 +106,16 @@ const CampaignLinkList = () => {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex flex-col min-w-0 gap-1">
                     <h4 className="font-bold text-base text-base-content dark:text-zinc-100 tracking-tight truncate">
-                      {link.title || "Untitled Tracking Pointer"}
+                      {link.title || "Untitled Pointer Routing"}
                     </h4>
                     <span className="text-xs text-base-content/40 dark:text-zinc-500 font-medium flex items-center gap-1">
                       <HiOutlineCalendar className="h-3.5 w-3.5" />
-                      Deployed {new Date(link.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {new Date(link.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </span>
                   </div>
 
                   <button
-                    onClick={() => deleteLinkMutation.mutate(link._id)}
+                    onClick={() => deleteLinkMutation.mutate(link.shortId)}
                     disabled={deleteLinkMutation.isPending}
                     className="btn btn-circle btn-xs border border-base-300 dark:border-zinc-800 bg-base-100 dark:bg-zinc-950 text-base-content/40 hover:text-error hover:bg-error/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 shrink-0"
                   >
@@ -128,21 +125,31 @@ const CampaignLinkList = () => {
 
                 <div className="p-3 bg-base-200/50 dark:bg-zinc-950/40 rounded-xl border border-base-300/40 dark:border-zinc-800/40 space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold text-indigo-500 dark:text-indigo-400 select-all truncate">
-                      {link.shortUrl}
+                    <span className="text-sm font-bold text-indigo-500 dark:text-indigo-400 select-all truncate font-mono">
+                      {window.location.origin}/api/url/{link.shortId}/campaign
                     </span>
-                    <button
-                      onClick={() => handleCopy(link._id, link.shortUrl)}
-                      className={`btn btn-ghost btn-xs h-7 w-7 p-0 rounded-lg text-base-content/50 hover:text-indigo-500 hover:bg-base-300 dark:hover:bg-zinc-800 transition-all ${
-                        copiedId === link._id ? "text-emerald-500 hover:text-emerald-500 bg-emerald-500/10" : ""
-                      }`}
-                    >
-                      {copiedId === link._id ? <HiOutlineSquare2Stack className="h-4 w-4 animate-scale" /> : <HiOutlineShare className="h-4 w-4" />}
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <a 
+                        href={`${window.location.origin}/api/url/${link.shortId}/campaign`}
+                        target="result" 
+                        rel="noreferrer" 
+                        className="btn btn-ghost btn-xs h-7 w-7 p-0 rounded-lg text-base-content/50 hover:text-primary hover:bg-base-300 dark:hover:bg-zinc-800"
+                      >
+                        <HiOutlineEye className="h-4 w-4" />
+                      </a>
+                      <button
+                        onClick={() => handleCopy(link._id, link.shortId)}
+                        className={`btn btn-ghost btn-xs h-7 w-7 p-0 rounded-lg text-base-content/50 hover:text-indigo-500 hover:bg-base-300 dark:hover:bg-zinc-800 transition-all ${
+                          copiedId === link._id ? "text-emerald-500 hover:text-emerald-500 bg-emerald-500/10" : ""
+                        }`}
+                      >
+                        {copiedId === link._id ? <HiOutlineSquare2Stack className="h-4 w-4" /> : <HiOutlineShare className="h-4 w-4" />}
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="border-t border-base-300/40 dark:border-zinc-800/40 pt-2">
-                    <p className="text-xs text-base-content/50 dark:text-zinc-500 font-medium line-clamp-1 break-all">
+                    <p className="text-xs text-base-content/50 dark:text-zinc-500 font-medium line-clamp-1 break-all select-all">
                       {link.originalUrl}
                     </p>
                   </div>
@@ -157,7 +164,7 @@ const CampaignLinkList = () => {
                 
                 <div className="flex items-baseline gap-1 bg-base-200/60 dark:bg-zinc-950/40 px-3 py-1 rounded-lg border border-base-300/30 dark:border-zinc-800/30">
                   <span className="text-sm font-black tracking-tight text-base-content dark:text-zinc-100">
-                    {link.clicks || 0}
+                    {link.clickCount || 0}
                   </span>
                   <span className="text-[10px] font-bold text-base-content/40 dark:text-zinc-500 uppercase tracking-wide">
                     Hits
@@ -170,9 +177,9 @@ const CampaignLinkList = () => {
       ) : (
         <div className="w-full flex flex-col items-center justify-center text-center p-12 border border-dashed border-base-300 dark:border-zinc-800 rounded-2xl bg-base-100 dark:bg-zinc-900/40">
           <HiOutlineLink className="h-12 w-12 text-base-content/20 mb-3" />
-          <h3 className="text-sm font-bold tracking-tight">No grouped links discovered</h3>
+          <h3 className="text-sm font-bold tracking-tight">No tracking shortcuts found</h3>
           <p className="text-xs text-base-content/40 font-medium max-w-xs mt-0.5">
-            Modify your tracking keywords or deploy a clean destination short mapping instance.
+            Deploy your destination long URLs using standard tracking configuration pipelines to populate this index.
           </p>
         </div>
       )}
@@ -180,4 +187,4 @@ const CampaignLinkList = () => {
   );
 };
 
-export default CampaignLinkList;
+export default LinkList;

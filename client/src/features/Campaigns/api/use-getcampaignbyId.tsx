@@ -9,5 +9,6 @@ export const useGetCampaignById = (id: string) => {
       return res.data;
     },
     enabled: !!id,
+    
   });
 };
