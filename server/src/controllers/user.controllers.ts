@@ -70,7 +70,7 @@ const handleRegister = async (req: Request, res: Response) => {
         
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000 
         });
@@ -119,7 +119,7 @@ const handleLogin = async (req: Request, res: Response) => {
         
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'none',
             maxAge: 24 * 60 * 60 * 1000 
         });
@@ -142,8 +142,8 @@ const handleLogout = async (req: Request, res: Response) => {
   try {
     res.cookie("token", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure:true,
+      sameSite: "none",
       expires: new Date(0), 
     });
 
