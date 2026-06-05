@@ -194,7 +194,6 @@ export const handleAddLinkToCampaign = async (req: Request, res: Response) => {
   try {
     const { campaignId } = req.params;
     const { title, originalUrl } = req.body;
-    console.log("checkpoint")
 
     if (!title || !originalUrl) {
       return res.status(400).json({ 
