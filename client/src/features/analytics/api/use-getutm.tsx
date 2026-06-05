@@ -9,7 +9,6 @@ export const useGetCampaignUtmStats = (campaignId: string | undefined) => {
       const { data } = await axios.get<BaseResponse<CampaignUtmData>>(
         `/api/analytics/${campaignId}/utm`
       );
-      console.log(data)
       if(!data)
       {
         console.log("error")

@@ -14,7 +14,7 @@ const LinkDashboard = () => {
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8 flex flex-col gap-8 text-base-content antialiased">
       
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-base-300 pb-6 mt-10 md:mt-0">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-base-300 pb-6 mt-auto md:mt-0">
         <div className="flex flex-col gap-2">
           <div className="self-start">
             <button 

@@ -31,7 +31,6 @@ const LinkList = () => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const { data: response, isLoading, error } = useGetCampaignById(campaignId as string);
-  console.log(response)
   
   const campaignLinks: LinkItem[] = response?.data?.links || [];
   const campaignTitle = response?.title || "Campaign Links";

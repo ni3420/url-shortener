@@ -9,7 +9,6 @@ export const useGetCampaignOverview = (campaignId: string | undefined) => {
       const { data } = await axios.get<BaseResponse<CampaignOverviewData>>(
         `/api/analytics/${campaignId}/overview`
       );
-      console.log("Campaign Overview Data:", data);
       return data.data;
     },
     enabled: !!campaignId,

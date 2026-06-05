@@ -10,7 +10,6 @@ export const useGetCampaignBreakdown = (campaignId: string | undefined) => {
       const { data } = await axios.get<BaseResponse<CampaignBreakdownData>>(
         `/api/analytics/${campaignId}/breakdown`
       );
-      console.log("Campaign Breakdown Data:", data);
       return data.data;
     },
     enabled: !!campaignId,
