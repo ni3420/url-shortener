@@ -24,7 +24,7 @@ const AnalyticsSchema = new Schema<Analytics>({
     },
     device: {
   type: String,
-  enum: ["Desktop", "Mobile", "Tablet", "Bot"],
+  enum: ["Desktop", "Mobile", "Tablet", "Bot","unknown"],
   default: "unknown"
 },
     country:{

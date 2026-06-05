@@ -20,8 +20,8 @@ app.use(cookie())
 
 
 app.use("/api/auth",userRouter)
-app.use("/api/url",urlRouter)
-app.use("/api/campaign",CampaignRouter)
+app.use("/api/url",auth,urlRouter)
+app.use("/api/campaign",auth,CampaignRouter)
 app.use("/api/analytics",AnalyticsRouter)
 
 

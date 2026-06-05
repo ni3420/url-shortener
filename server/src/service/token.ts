@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken"
 
 const secretKey = process.env.JWT_SECRET_KEY as string
 
-const GenerateToken=(name:string,email:string)=>{
-    return jwt.sign({name,email},secretKey )
+const GenerateToken=(name:string,_id:string)=>{
+    return jwt.sign({name,_id},secretKey )
 
 }
 

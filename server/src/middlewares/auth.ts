@@ -7,7 +7,6 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
     if (!token) {
         return res.status(401).json({
             success: false,
-            code: 401,
             message: "NOT_AUTHENTICATED",
         });
     }
@@ -18,17 +17,18 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
         if (!decoded) {
             return res.status(401).json({
                 success: false,
-                code: 401,
                 message: "INVALID_TOKEN",
             });
-        }
+        };
 
-       
+    
+
+        (req as any).user = decoded;
+
         next();
     } catch (error) {
         return res.status(401).json({
             success: false,
-            code: 401,
             message: "TOKEN_EXPIRED",
         });
     }
