@@ -7,11 +7,13 @@ import { toast } from "sonner";
 import { HiOutlineLink } from "react-icons/hi2";
 import { HiLink } from "react-icons/hi2";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
 
 type FormValues = z.infer<typeof CreateLinkSchema>;
 
 const Form = () => {
   const mutation = useCreateLink();
+  const navigate=useNavigate()
 
   const {
     register,
@@ -21,7 +23,7 @@ const Form = () => {
   } = useForm<FormValues>({
     resolver: zodResolver(CreateLinkSchema),
     defaultValues: {
-      url: "",
+      urls: "",
     },
   });
 
@@ -29,6 +31,7 @@ const Form = () => {
     mutation.mutate(data, {
       onSuccess: () => {
         toast.success("URL shortened successfully!");
+        navigate("/links")
         reset();
       },
       onError: (error) => {
@@ -70,16 +73,16 @@ const Form = () => {
                 type="text"
                 placeholder="https://example.com/your-long-destination-link"
                 disabled={mutation.isPending}
-                {...register("url")}
+                {...register("urls")}
                 className={`input input-bordered w-full h-12 pl-12 bg-base-200/30 dark:bg-zinc-950/40 border-base-300 dark:border-zinc-800 text-sm placeholder:opacity-40 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-500 transition-all ${
-                  errors.url ? "input-error bg-error/5 border-error/50 focus:border-error" : ""
+                  errors.urls? "input-error bg-error/5 border-error/50 focus:border-error" : ""
                 }`}
               />
             </div>
-            {errors.url && (
+            {errors.urls && (
               <label className="label py-0.5">
                 <span className="label-text-alt text-error font-medium">
-                  {errors.url.message}
+                  {errors.urls.message}
                 </span>
               </label>
             )}
