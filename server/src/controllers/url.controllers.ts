@@ -2,11 +2,18 @@ import Url from "../models/url.models";
 import type {  Request,Response } from "express";
 import crypto from "crypto"
 import QRcode from "qrcode"
+import { extractUtmParameters } from "../service/extractUtmParameter";
+import AnalyticsModel from "../models/analytics.models";
+import { UAParser } from "ua-parser-js";
+import geoip from "geoip-lite";
+import mongoose from "mongoose";
+import Campaign from "../models/campaign.models";
 
 
 const handleUrl = async (req: Request, res: Response) => {
   try {
     const { urls } = req.body ;
+    const userId = (req as any).user?._id;
     if(!urls)
     {
       return res.json({"msg":"url required"})
@@ -25,12 +32,13 @@ const handleUrl = async (req: Request, res: Response) => {
 
     const baseUrl = process.env.BASE_URL || "http://localhost:3000";
 
-    const qrCodeUrl = await QRcode.toDataURL(`${baseUrl}/${shortCode}`);
+    const qrCodeUrl = await QRcode.toDataURL(`${baseUrl}/api/url/${shortCode}`);
 
     const url = await Url.create({
       shortId: shortCode,
       originalUrl: cleanUrl,
       qrCodeUrl,
+      userId
     });
 
     return res.status(201).json({
@@ -44,13 +52,20 @@ const handleUrl = async (req: Request, res: Response) => {
 };
 const handleShowUrl = async (req: Request, res: Response) => {
   try {
+
+    const userId = (req as any).user?._id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access context."
+      });
+    }
+      // console.log(req.user)
     // Only find URLs where campaignId is explicitly null or does not exist
     const urls = await Url.find({
-      $or: [
-        { campaignId: null },
-        { campaignId: { $exists: false } }
-      ]
-    });
+      userId: userId
+    })
 
     if (!urls || urls.length === 0) {
       return res.status(404).json({
@@ -72,19 +87,35 @@ const handleShowUrl = async (req: Request, res: Response) => {
     });
   }
 };
-const handleUrlDeletion=async(req:Request,res:Response)=>{
-    try {
-          const data = Object.values(req.body)[0];
-          if(!data) return res.status(400).json({msg:"url is required"})
-            const del=await Url.findOneAndDelete({short_Url:data as string})
-        if(!del) return res.status(400).json({"msg":"url not found"})
-            res.json({"msg":"delete the url successful"})
-    } catch (error) {
-        console.log(error)
-        
-    }
-}
+ const handleUrlDeletion = async (req: Request, res: Response) => {
+  try {
+    const rawUserId = (req as any).user?._id;
+    const { linkId } = req.body;
 
+
+    const url=await Url.findOneAndDelete({shortId:linkId})
+
+    if(!url)
+    {
+      return res.status(401).json({
+        success:false,
+        msg:"not deleted the url "
+      })
+    }
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Shortened tracking routing link dropped successfully." 
+    });
+
+  } catch (error: any) {
+    console.error("Error inside handleUrlDeletion controller:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error dropping link registry index configuration."
+    });
+  }
+}
 const handleOriginalUrl=async(req:Request,res:Response)=>{
     try {
         const url=req.params.shortId;
@@ -98,8 +129,48 @@ const handleOriginalUrl=async(req:Request,res:Response)=>{
         
     }
 }
+const handleCampaignUrl = async (req: Request, res: Response) => {
+  try {
+    const { shortId } = req.params;
+    if (!shortId) {
+      return res.status(400).json({ msg: "shortId is required" });
+    }
+
+    const urlData = await Url.findOneAndUpdate(
+      { shortId },
+      { $inc: { clickCount: 1 } },
+      { new: true }
+    );
+
+    if (!urlData) {
+      return res.status(404).json({ msg: "Url is not found" });
+    }
+
+const parser = new UAParser(req.headers['user-agent']);
+const result=parser.getResult()
+    const ip =
+  (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+  req.socket.remoteAddress ||
+  "";
+    const geo = geoip.lookup(ip);
+    const baseUtmParameters = extractUtmParameters(urlData.originalUrl);
+
+    await AnalyticsModel.create({
+      campaignId: urlData.campaignId,
+      device:result?.device.type,
+      country: geo?.country,
+      browser:result?.browser.name,
+      ...baseUtmParameters,
+    });
+
+    return res.redirect(urlData.originalUrl);
+  } catch (error) {
+    console.error("Critical error in handleCampaignUrl redirection pipe:", error);
+    return res.status(500).json({ msg: "Internal routing deployment exception" });
+  }
+};
 
 
 
 
-export {handleUrl,handleShowUrl,handleOriginalUrl,handleUrlDeletion}
+export {handleUrl,handleShowUrl,handleOriginalUrl,handleUrlDeletion,handleCampaignUrl}

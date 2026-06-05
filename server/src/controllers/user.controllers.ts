@@ -5,6 +5,7 @@ import { GenerateToken } from "../service/token";
 
 const handleGetCurrentUser = async (req: Request, res: Response) => {
     try {
+        const userId=(req as any).user._id
         const session = req.cookies?.token;
         if (!session) {
             return res.status(401).json({
@@ -12,10 +13,19 @@ const handleGetCurrentUser = async (req: Request, res: Response) => {
                 message: "Unauthorized"
             });
         }
+        const user=await UserModel.findOne({_id:userId})
+        if(!user)
+        {
+            return res.status(401).json({
+                success:false,
+                msg:"unauthorized"
+            })
+        }
         
         return res.status(200).json({
             success: true,
             message: "Current session running",
+            data:user
         });
     } catch (error) {
         console.error("Get Current User Error:", error);
@@ -54,6 +64,16 @@ const handleRegister = async (req: Request, res: Response) => {
             password,
         });    
 
+
+
+        const token = GenerateToken(user.name, user._id.toString());
+        
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000 
+        });
         return res.status(201).json({ 
             success: true,
             message: "User registered successfully",
@@ -88,7 +108,6 @@ const handleLogin = async (req: Request, res: Response) => {
         }  
 
         const isMatch = await bcrypt.compare(password as string, user.password);
-        console.log(isMatch)
         if (!isMatch) {
             return res.status(401).json({ 
                 success: false,
@@ -96,7 +115,7 @@ const handleLogin = async (req: Request, res: Response) => {
             });
         }
 
-        const token = GenerateToken(user.name, user.email);
+        const token = GenerateToken(user.name, user._id.toString());
         
         res.cookie("token", token, {
             httpOnly: true,

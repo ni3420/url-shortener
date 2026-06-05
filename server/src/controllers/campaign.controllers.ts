@@ -3,13 +3,11 @@ import crypto from "crypto";
 import QRcode from "qrcode";
 import Campaign from "../models/campaign.models";
 import Url from "../models/url.models";
-import AnalyticsModel from "../models/analytics.models";
-import { extractUtmParameters } from "../service/extractUtmParameter";
-import mongoose from "mongoose";
-
+import mongoose,{Schema} from "mongoose";
 
 export const handleCreateCampaign = async (req: Request, res: Response) => {
   try {
+    const userId=(req as any).user._id
     const { title, tags } = req.body; 
 
     if (!title) {
@@ -19,25 +17,14 @@ export const handleCreateCampaign = async (req: Request, res: Response) => {
     const campaign = await Campaign.create({
       title,
       tags: tags || [],
+      userId
     });
 
-    
-
-    const shortCode = crypto.randomBytes(8).toString("base64url").substring(0, 6);
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-    const qrCodeUrl = await QRcode.toDataURL(`${baseUrl}/${shortCode}`);
-
-    // const newUrl = await Url.create({
-    //   shortId: shortCode,
-    //   qrCodeUrl,
-    //   campaignId: campaign._id,
-    // });
     return res.status(201).json({
       success: true,
       message: "Campaign, URL, and Initial Analytics created successfully",
       data: {
         campaign,
-        // url: newUrl,
       },
     });
 
@@ -49,9 +36,11 @@ export const handleCreateCampaign = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const handleGetAllCampaigns = async (req: Request, res: Response) => {
   try {
-    const campaigns = await Campaign.find().sort({ createdAt: -1 });
+    const userId=(req as any).user._id
+    const campaigns = await Campaign.find({userId}).sort({ createdAt: -1 }).lean();
 
     return res.status(200).json({
       success: true,
@@ -69,8 +58,11 @@ export const handleGetCampaignById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    // ◄— .populate("links") tells Mongoose to lookup and swap the IDs for the actual Url documents
-    const campaign = await Campaign.findById(id).populate("links");
+    const campaign = await Campaign.findByIdAndUpdate(id,{
+      $push:{
+        count:{ date: new Date(), clicks: 0 }
+      }
+    }).populate("links").lean();
 
     if (!campaign) {
       return res.status(404).json({
@@ -90,6 +82,7 @@ export const handleGetCampaignById = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const handleUpdateCampaign = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -98,7 +91,7 @@ export const handleUpdateCampaign = async (req: Request, res: Response) => {
       const exists = await Campaign.findOne({
         custom_alias: req.body.custom_alias,
         _id: { $ne: id }
-      });
+      }).select("_id").lean();
 
       if (exists) {
         return res.status(409).json({
@@ -110,7 +103,7 @@ export const handleUpdateCampaign = async (req: Request, res: Response) => {
 
     const updated = await Campaign.findByIdAndUpdate(id, req.body, {
       new: true
-    });
+    }).lean();
 
     if (!updated) {
       return res.status(404).json({
@@ -135,7 +128,7 @@ export const handleDeleteCampaign = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    const deleted = await Campaign.findByIdAndDelete(id);
+    const deleted = await Campaign.findByIdAndDelete(id).lean();
 
     if (!deleted) {
       return res.status(404).json({
@@ -156,7 +149,6 @@ export const handleDeleteCampaign = async (req: Request, res: Response) => {
   }
 };
 
-
 export const handleShowCampaignUrls = async (req: Request, res: Response) => {
   try {
     const { campaignId } = req.params;
@@ -175,7 +167,7 @@ export const handleShowCampaignUrls = async (req: Request, res: Response) => {
       });
     }
 
-    const urls = await Url.find({ campaignId: new mongoose.Types.ObjectId(campaignId as string) });
+    const urls = await Url.find({ campaignId: new mongoose.Types.ObjectId(campaignId as string) }).lean();
 
     if (!urls || urls.length === 0) {
       return res.status(404).json({
@@ -202,6 +194,7 @@ export const handleAddLinkToCampaign = async (req: Request, res: Response) => {
   try {
     const { campaignId } = req.params;
     const { title, originalUrl } = req.body;
+    console.log("checkpoint")
 
     if (!title || !originalUrl) {
       return res.status(400).json({ 
@@ -236,7 +229,7 @@ export const handleAddLinkToCampaign = async (req: Request, res: Response) => {
     });
 
     campaign.links = campaign.links || [];
-    campaign.links.push(newUrl._id);
+    campaign.links.push(newUrl._id as unknown as Schema.Types.ObjectId);
     await campaign.save();
 
     return res.status(201).json({
