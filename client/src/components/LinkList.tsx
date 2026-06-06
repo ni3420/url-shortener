@@ -15,6 +15,7 @@ import {
   QrCode,
   Trash2 
 } from "lucide-react";
+import { conf } from "@/conf/conf";
 
 interface LinkItem {
   _id: string;
@@ -140,7 +141,7 @@ const LinkList = ({ search, status, sort }: LinkListProps) => {
       {processedLinks.map((link) => {
         const activeStatus = link.isActive ?? true;
         const clickCountCount = link.clickCount || 0;
-        const fullShortUrl = `${window.location.origin}/api/url/${link.shortId}`;
+        const fullShortUrl = `${conf.BaseUrl}/url/${link.shortId}`;
         const formattedDate = link.createdAt 
           ? new Date(link.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
           : "Unknown date";
@@ -161,7 +162,7 @@ const LinkList = ({ search, status, sort }: LinkListProps) => {
                 
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-black text-lg text-indigo-500 dark:text-indigo-400 break-all select-all">
-                    {window.location.host}/api/url/{link.shortId}
+                    {conf.BaseUrl}/url/{link.shortId}
                   </span>
                   
                   <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">

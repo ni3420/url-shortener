@@ -15,6 +15,7 @@ import {
   HiOutlineEye,
 } from "react-icons/hi2";
 import { HiOutlineCursorClick } from "react-icons/hi";
+import { conf } from "@/conf/conf";
 
 interface LinkItem {
   _id: string;
@@ -53,8 +54,8 @@ const LinkList = () => {
 
   const handleCopy = async (id: string, text: string) => {
     try {
-      const baseUrl = window.location.origin;
-      await navigator.clipboard.writeText(`${baseUrl}/api/url/${text}/campaign`);
+      // const baseUrl = window.location.origin;
+      await navigator.clipboard.writeText(`${conf.BaseUrl}/url/${text}/campaign`);
       setCopiedId(id);
       toast.success("Short link copied!");
       setTimeout(() => setCopiedId(null), 2000);
@@ -125,11 +126,11 @@ const LinkList = () => {
                 <div className="p-3 bg-base-200/50 dark:bg-zinc-950/40 rounded-xl border border-base-300/40 dark:border-zinc-800/40 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-bold text-indigo-500 dark:text-indigo-400 select-all truncate font-mono">
-                      {window.location.origin}/api/url/{link.shortId}/campaign
+                      {conf.BaseUrl}/url/{link.shortId}/campaign
                     </span>
                     <div className="flex items-center gap-1">
                       <a 
-                        href={`${window.location.origin}/api/url/${link.shortId}/campaign`}
+                        href={`${conf.BaseUrl}/url/${link.shortId}/campaign`}
                         target="result" 
                         rel="noreferrer" 
                         className="btn btn-ghost btn-xs h-7 w-7 p-0 rounded-lg text-base-content/50 hover:text-primary hover:bg-base-300 dark:hover:bg-zinc-800"

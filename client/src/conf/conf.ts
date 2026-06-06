@@ -1,7 +1,4 @@
 export const conf={
-    appwrite:{
-        url:import.meta.env.VITE_APPWRITE_URL,
-        project_id:import.meta.env.VITE_APPWRITE_PROJECT_ID
-    }
+    BaseUrl:import.meta.env.VITE_API_BASE_URL
 }
 
