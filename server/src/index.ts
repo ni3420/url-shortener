@@ -28,7 +28,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/auth", userRouter);
-app.use("/api/url", auth, urlRouter);
+app.use("/api/url",  urlRouter);
 app.use("/api/campaign", auth, CampaignRouter);
 app.use("/api/analytics", AnalyticsRouter);
 
