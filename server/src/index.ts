@@ -7,16 +7,17 @@ import CampaignRouter from "./routes/campaign.routes";
 import AnalyticsRouter from "./routes/analytics.routes";
 import cookie from "cookie-parser";
 import cors from "cors";
-import auth from "./middlewares/auth";
+import {requireAuthAndSync} from "./middlewares/auth";
+import { clerkMiddleware } from "@clerk/express";
 
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
+app.use(clerkMiddleware())
 app.use(cors({
-  origin: "https://url-shortener-seven-ebon.vercel.app",
+  origin: process.env.BASE_URL,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 }));
@@ -29,7 +30,7 @@ app.get("/health", (req, res) => {
 
 app.use("/api/auth", userRouter);
 app.use("/api/url",  urlRouter);
-app.use("/api/campaign", auth, CampaignRouter);
+app.use("/api/campaign", requireAuthAndSync, CampaignRouter);
 app.use("/api/analytics", AnalyticsRouter);
 
 const PORT = process.env.PORT || 3000;
