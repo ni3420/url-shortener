@@ -8,12 +8,13 @@ import { UAParser } from "ua-parser-js";
 import geoip from "geoip-lite";
 import mongoose from "mongoose";
 import Campaign from "../models/campaign.models";
+import type {AuthenticatedRequest} from "../types"
 
 
-const handleUrl = async (req: Request, res: Response) => {
+const handleUrl = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { urls } = req.body ;
-    const userId = (req as any).user?._id;
+    const userId = req.user?.id
     if(!urls)
     {
       return res.json({"msg":"url required"})
@@ -50,10 +51,10 @@ const handleUrl = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: "server error" });
   }
 };
-const handleShowUrl = async (req: Request, res: Response) => {
+const handleShowUrl = async (req: AuthenticatedRequest, res: Response) => {
   try {
 
-    const userId = (req as any).user?._id;
+    const userId = req.user?.id;
 
     if (!userId) {
       return res.status(401).json({
@@ -87,9 +88,9 @@ const handleShowUrl = async (req: Request, res: Response) => {
     });
   }
 };
- const handleUrlDeletion = async (req: Request, res: Response) => {
+ const handleUrlDeletion = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const rawUserId = (req as any).user?._id;
+    const userId = req.user?.id
     const { linkId } = req.body;
 
 

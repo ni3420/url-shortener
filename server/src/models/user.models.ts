@@ -1,52 +1,35 @@
-import mongoose ,{Schema ,Document} from "mongoose";
-import bcrypt from "bcrypt";
+import mongoose, { Schema, Document } from "mongoose";
 
-type UserRole="admin"|"user";
-
-interface User extends Document{
-    email:string;
-    password:string;
-    name:string;
-    role:UserRole
+export interface IUser extends Document {
+  clerkId: string;
+  email: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const UserSchema=new Schema<User>({
-    name:{
-        type:String,
-        required: [true, 'Name is required'],
-    
+const UserSchema = new Schema<IUser>(
+  {
+    clerkId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true,
-        index:true,
-        lowercase:true,
-        trim: true,
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
-    password:{
-        type:String,
-        required: [true, 'Password is required'],
-        minlength: [6, 'Password must be at least 6 characters']
+    name: {
+      type: String,
+      trim: true,
     },
-    role:{
-        type:String,
-        required:true,
-        default:"user"
+  },
+  { timestamps: true }
+);
 
-    }
-
-},{timestamps:true})
-
-UserSchema.pre("save", async function () {
-
-    if (!this.isModified("password")) return
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-});
-
-
-
-const UserModel= mongoose.model("User",UserSchema)
-export default UserModel
-
+const UserModel = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+export default UserModel;

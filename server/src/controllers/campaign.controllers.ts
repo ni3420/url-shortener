@@ -4,10 +4,11 @@ import QRcode from "qrcode";
 import Campaign from "../models/campaign.models";
 import Url from "../models/url.models";
 import mongoose,{Schema} from "mongoose";
+import type {AuthenticatedRequest} from "../types"
 
-export const handleCreateCampaign = async (req: Request, res: Response) => {
+export const handleCreateCampaign = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId=(req as any).user._id
+    const userId=req.user?.id
     const { title, tags } = req.body; 
 
     if (!title) {
@@ -37,9 +38,9 @@ export const handleCreateCampaign = async (req: Request, res: Response) => {
   }
 };
 
-export const handleGetAllCampaigns = async (req: Request, res: Response) => {
+export const handleGetAllCampaigns = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const userId=(req as any).user._id
+    const userId=req.user?.id
     const campaigns = await Campaign.find({userId}).sort({ createdAt: -1 }).lean();
 
     return res.status(200).json({
