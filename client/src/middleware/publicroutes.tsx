@@ -1,31 +1,20 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
+import { useAuth } from "@clerk/clerk-react";
 
-const PublicRoutesOnly = () => {
-  const { data: response, isLoading } = useQuery({
-    queryKey: ["auth", "session"],
-    queryFn: async () => {
-      const res = await api.get("/auth/current");
-      return res.data;
-    },
-    retry: false,
-    staleTime: 1000 * 60 * 5,
-  });
+export default function PublicRoutesOnly() {
+  const { isSignedIn, isLoaded } = useAuth();
 
-  if (isLoading) {
+  if (!isLoaded) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-base-100 dark:bg-zinc-950">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+      <div className="w-full h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
+        <span className="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  if (response?.success) {
+  if (isSignedIn) {
     return <Navigate to="/home" replace />;
   }
 
   return <Outlet />;
-};
-
-export default PublicRoutesOnly;
+}

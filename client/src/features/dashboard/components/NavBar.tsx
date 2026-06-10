@@ -41,7 +41,7 @@ const NavBar = ({ onMobileMenuToggle }: NavBarProps) => {
           <HiOutlineBars3 className="h-5 w-5" />
         </button>
 
-        <div className="flex items-center gap-2.5 font-bold tracking-tight">
+        <div className="flex items-center gap-2.5 font-bold tracking-tight md:hidden lg:hidden">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20">
             <span className="text-lg font-black text-white tracking-tighter">S</span>
           </div>

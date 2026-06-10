@@ -1,35 +1,63 @@
-"use client";
-
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
+import { useAuth } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const AuthRoutesProtect = () => {
+export default function AuthRoutesProtect() {
   const location = useLocation();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
+  const [isSynced, setIsSynced] = useState(false);
+  const [syncError, setSyncError] = useState(false);
 
-  const { data: response, isLoading, isError } = useQuery({
-    queryKey: ["auth", "session"],
-    queryFn: async () => {
-      const res = await api.get("/auth/current");
-      return res.data;
-    },
-    retry: false,
-    staleTime: 1000 * 60 * 5, 
-  });
+  useEffect(() => {
+    const syncUserSession = async () => {
+      if (!isLoaded || !isSignedIn) return;
 
-  if (isLoading) {
+      try {
+        const token = await getToken();
+        await axios.get("http://localhost:3000/api/auth/current", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setIsSynced(true);
+      } catch (error) {
+        console.error("Database user profiles mapping sync failure:", error);
+        setSyncError(true);
+      }
+    };
+
+    syncUserSession();
+  }, [isLoaded, isSignedIn, getToken]);
+
+  if (!isLoaded || (isSignedIn && !isSynced && !syncError)) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-base-100 dark:bg-zinc-950">
-        <span className="loading loading-spinner loading-lg text-indigo-500"></span>
+      <div className="w-full h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-950">
+        <span className="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full" />
       </div>
     );
   }
 
-  if (isError || !response?.success) {
+  if (!isSignedIn) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <Outlet />;
-};
+  if (syncError) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-neutral-50 dark:bg-neutral-950 gap-4 text-center px-4">
+        <h1 className="text-xl font-bold text-rose-500">Account Sync Failure</h1>
+        <p className="text-sm text-neutral-500 max-w-sm">
+          We encountered an issue initializing your local profile workspace. Please try reconnecting.
+        </p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-all"
+        >
+          Retry Profile Initialization
+        </button>
+      </div>
+    );
+  }
 
-export default AuthRoutesProtect;
+  return <Outlet />;
+}

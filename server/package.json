@@ -10,10 +10,12 @@
     "typescript": "^5"
   },
   "scripts": {
-        "dev": "bun --watch run src/index.ts",
-         "start": "bun run src/index.ts"
+    "dev": "bun --watch run src/index.ts",
+    "start": "bun run src/index.ts"
   },
   "dependencies": {
+    "@clerk/backend": "^3.5.0",
+    "@clerk/express": "^2.1.23",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
