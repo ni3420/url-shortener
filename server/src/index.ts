@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(clerkMiddleware())
 app.use(cors({
-  origin: process.env.BASE_URL,
+  origin: "https://url-shortener-seven-ebon.vercel.app",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 }));
