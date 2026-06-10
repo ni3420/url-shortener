@@ -2,6 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { conf } from "@/conf/conf";
 
 export default function AuthRoutesProtect() {
   const location = useLocation();
@@ -15,7 +16,7 @@ export default function AuthRoutesProtect() {
 
       try {
         const token = await getToken();
-        await axios.get("http://localhost:3000/api/auth/current", {
+        await axios.get(`${conf.BaseUrl}/auth/current`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
