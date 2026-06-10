@@ -7,6 +7,7 @@ export const useGetCampaignById = (id: string) => {
     queryFn: async () => {
       const res = await api.get(`/campaign/${id}`);
       return res.data;
+
     },
     enabled: !!id,
     

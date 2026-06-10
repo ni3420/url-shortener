@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import { AuthenticatedRequest } from "../types";
+import type { AuthenticatedRequest } from "../types";
 
 export const handleGetCurrentUser = async (req: AuthenticatedRequest, res: Response): Promise<any> => {
   try {

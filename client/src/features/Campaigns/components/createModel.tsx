@@ -52,10 +52,11 @@ const CreateLinkModal = ({ isOpen, onClose, campaignId, campaignTitle }: CreateL
       }
     },
     onSuccess: () => {
-      toast.success("Short tracking pointer generated!");
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
       queryClient.invalidateQueries({ queryKey: ["campaign", campaignId] });
-      queryClient.invalidateQueries({ queryKey: ["campaign-details", campaignId] });
+      // queryClient.invalidateQueries({ queryKey: ["campaign-details", campaignId] });
+      toast.success("Short tracking pointer generated!");
+
       reset();
       onClose();
     },

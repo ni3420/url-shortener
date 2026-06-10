@@ -41,11 +41,12 @@ const LinkList = () => {
       await api.delete(`/url`, { data: { linkId } });
     },
     onSuccess: () => {
-      toast.success("Shortened tracking link removed");
       
       // Forces background updates across any query key tracking active campaigns
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
       queryClient.invalidateQueries({ queryKey: ["campaign", campaignId] });
+      toast.success("Shortened tracking link removed");
+
     },
     onError: () => {
       toast.error("Failed to delete link resource");

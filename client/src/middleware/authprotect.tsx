@@ -1,8 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { conf } from "@/conf/conf";
+import api from "@/lib/api";
 
 export default function AuthRoutesProtect() {
   const location = useLocation();
@@ -10,13 +9,15 @@ export default function AuthRoutesProtect() {
   const [isSynced, setIsSynced] = useState(false);
   const [syncError, setSyncError] = useState(false);
 
+
+  
   useEffect(() => {
     const syncUserSession = async () => {
       if (!isLoaded || !isSignedIn) return;
 
       try {
         const token = await getToken();
-        await axios.get(`${conf.BaseUrl}/auth/current`, {
+        await api.get(`/auth/current`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

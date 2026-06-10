@@ -35,14 +35,14 @@ const NavBar = ({ onMobileMenuToggle }: NavBarProps) => {
       <div className="flex items-center gap-3">
         <button
           onClick={onMobileMenuToggle}
-          className="md:hidden btn btn-ghost btn-square btn-sm border border-base-300 dark:border-zinc-800 shadow-sm rounded-xl text-base-content dark:text-zinc-400"
+          className="lg:hidden btn btn-ghost btn-square btn-sm border border-base-300 dark:border-zinc-800 shadow-sm rounded-xl text-base-content dark:text-zinc-400"
           aria-label="Toggle navigation menu"
         >
           <HiOutlineBars3 className="h-5 w-5" />
         </button>
 
-        <div className="flex items-center gap-2.5 font-bold tracking-tight md:hidden lg:hidden">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20">
+        <div className="flex items-center gap-2.5 font-bold tracking-tight ">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-md shadow-indigo-500/20  lg:hidden">
             <span className="text-lg font-black text-white tracking-tighter">S</span>
           </div>
           <span className="text-lg bg-gradient-to-r from-base-content to-base-content/70 dark:from-zinc-100 dark:to-zinc-400 bg-clip-text text-transparent">

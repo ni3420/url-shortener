@@ -25,7 +25,7 @@ export const useGetCampaignUrls = (campaignId: string | undefined) => {
       console.log(data)
       return data.urls;
     },
-    enabled: !!campaignId,
-    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    retry:2
   });
 };

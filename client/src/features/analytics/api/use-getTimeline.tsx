@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import type { BaseResponse, TimelineItem } from "../types";
+import api from "@/lib/api";
 
 export const useGetCampaignTimeline = (campaignId: string | undefined) => {
   return useQuery<TimelineItem[], Error>({
     queryKey: ["campaign", "timeline", campaignId],
     queryFn: async () => {
-      const { data } = await axios.get<BaseResponse<TimelineItem[]>>(
-        `/api/analytics/${campaignId}/timeline`
+      const { data } = await api.get<BaseResponse<TimelineItem[]>>(
+        `analytics/${campaignId}/timeline`
       );
-      return data.data;
+      console.log(data)
+      return data.data
     },
     enabled: !!campaignId,
     staleTime: 1000 * 60 * 5,

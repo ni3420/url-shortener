@@ -41,6 +41,7 @@ const CreateCampaignForm = ({onSuccessLaunch}:CreateCampaignProps) => {
     mutateAsync(data, {
       onSuccess: () => {
         toast.success("Campaign deployed successfully!");
+        
         reset();
         onSuccessLaunch()
 

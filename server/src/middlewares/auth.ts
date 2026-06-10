@@ -1,7 +1,7 @@
 import type { Response, NextFunction } from "express";
 import { getAuth, createClerkClient } from "@clerk/express";
 import UserModel from "../models/user.models";
-import type { AuthenticatedRequest } from "../types";
+import type { AuthenticatedRequest } from "../types"
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
@@ -12,7 +12,6 @@ export async function requireAuthAndSync(
 ): Promise<any> {
   try {
     const { userId } = getAuth(req);
-
     if (!userId) {
       return res.status(401).json({ success: false, message: "Unauthorized access token" });
     }
@@ -50,6 +49,6 @@ export async function requireAuthAndSync(
 
     return next();
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Internal application authorization fault" });
+    return res.status(500).json({ success: false, message: "Internal server authentication fault" });
   }
 }

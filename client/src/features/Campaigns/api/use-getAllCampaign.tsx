@@ -10,7 +10,6 @@ export const useGetAllCampaigns = () => {
     },
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    
   });
 };
