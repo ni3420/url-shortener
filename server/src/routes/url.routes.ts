@@ -4,11 +4,11 @@ import {urlCreateLimiter,urlManipulateLimiter} from "../service/ratelimit"
 import {requireAuthAndSync} from "../middlewares/auth"
 const router=Router()
 
-router.post("/",urlCreateLimiter,requireAuthAndSync,handleUrl)
-router.get("/",urlManipulateLimiter,requireAuthAndSync,handleShowUrl)
-router.get("/:shortId",urlManipulateLimiter,handleOriginalUrl)
+router.post("/",requireAuthAndSync,handleUrl)
+router.get("/",requireAuthAndSync,handleShowUrl)
+router.get("/:shortId",handleOriginalUrl)
 router.get("/:shortId/campaign",handleCampaignUrl)
 
-router.delete("/",urlManipulateLimiter,requireAuthAndSync,handleUrlDeletion)
+router.delete("/",requireAuthAndSync,handleUrlDeletion)
 
 export default router
