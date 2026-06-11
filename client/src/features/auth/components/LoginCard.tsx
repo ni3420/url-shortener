@@ -73,10 +73,11 @@ export default function LoginCard() {
     try {
       await signIn.authenticateWithRedirect({
         strategy: provider,
-        redirectUrl: "/sso-callback",
+        redirectUrl: "/register",
         redirectUrlComplete: "/home",
       });
-    } catch {
+    } catch (err){
+      console.log(err)
       toast.error(`Failed to initiate login with ${provider === "oauth_google" ? "Google" : "GitHub"}`);
       setIsSocialLoading(null);
     }

@@ -34,7 +34,7 @@ const LinkList = () => {
   const { data: response, isLoading, error } = useGetCampaignById(campaignId as string);
   
   const campaignLinks: LinkItem[] = response?.data?.links || [];
-  const campaignTitle = response?.title || "Campaign Links";
+  const campaignTitle = response?.data.title || "Campaign Links";
 
   const deleteLinkMutation = useMutation({
     mutationFn: async (linkId: string) => {
@@ -44,7 +44,7 @@ const LinkList = () => {
       
       // Forces background updates across any query key tracking active campaigns
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
-      queryClient.invalidateQueries({ queryKey: ["campaign", campaignId] });
+      queryClient.invalidateQueries({ queryKey: ["campaign","links", campaignId] });
       toast.success("Shortened tracking link removed");
 
     },

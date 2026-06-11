@@ -5,16 +5,15 @@ import { Toaster } from "sonner";
 import DashboardLayout from "../pages/dashboard/layout";
 import AuthRoutesProtect from "@/middleware/authprotect";
 import PublicRoutesOnly from "@/middleware/publicroutes";
+import SignInPage from "@/pages/auth/signin";
+import SignUpPage from "@/pages/auth/signup";
 import Not_Found from "@/components/Not-Found";
-
 const Home = lazy(() => import("@/features/dashboard/components/Home"));
 const LinkDashboard = lazy(() => import("@/features/dashboard/components/LinkDashBoard"));
 const AnalyticsPage = lazy(() => import("@/features/dashboard/components/analytics"));
 const MainPage = lazy(() => import("@/features/Campaigns/components/Mainpage"));
 const CampaignLinkList = lazy(() => import("@/features/Campaigns/components/CampaignAllLinks"));
 const CampaignInfo = lazy(() => import("@/features/Campaigns/components/CampaignInfo"));
-const SignInPage = lazy(() => import("@/pages/auth/signin"));
-const SignUpPage = lazy(() => import("@/pages/auth/signup"));
 
 const PageLoader = () => (
   <div className="w-full h-[60vh] flex items-center justify-center bg-transparent">
@@ -103,17 +102,13 @@ const Router = createBrowserRouter([
       {
         path: "/login",
         element: (
-          <Suspense fallback={<PageLoader />}>
             <SignInPage />
-          </Suspense>
         )
       },
       {
         path: "/register",
         element: (
-          <Suspense fallback={<PageLoader />}>
             <SignUpPage />
-          </Suspense>
         )
       }
     ]
