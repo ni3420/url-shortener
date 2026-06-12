@@ -1,35 +1,41 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
+import api, { setupAuthInterceptor } from "@/lib/api"; 
 
 export default function AuthRoutesProtect() {
   const location = useLocation();
   const { isSignedIn, isLoaded, getToken } = useAuth();
-  const [isSynced, setIsSynced] = useState(false);
-  const [syncError, setSyncError] = useState(false);
+  const [isSynced, setIsSynced] = useState<boolean>(false);
+  const [syncError, setSyncError] = useState<boolean>(false);
 
-
-  
   useEffect(() => {
+    let isMounted = true;
+
     const syncUserSession = async () => {
       if (!isLoaded || !isSignedIn) return;
 
       try {
-        const token = await getToken();
-        await api.get(`/auth/current`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setIsSynced(true);
+        setupAuthInterceptor(getToken);
+        await api.get(`/auth/current`);
+        
+        if (isMounted) {
+          setIsSynced(true);
+          setSyncError(false);
+        }
       } catch (error) {
-        console.error("Database user profiles mapping sync failure:", error);
-        setSyncError(true);
+        console.error(error);
+        if (isMounted) {
+          setSyncError(true);
+        }
       }
     };
 
     syncUserSession();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isLoaded, isSignedIn, getToken]);
 
   if (!isLoaded || (isSignedIn && !isSynced && !syncError)) {

@@ -105,7 +105,7 @@ export default function SignUpCard() {
     try {
       await signUp.authenticateWithRedirect({
         strategy: provider,
-        redirectUrl: "/sso-callback",
+        redirectUrl: "/register",
         redirectUrlComplete: "/home",
       });
     } catch {
